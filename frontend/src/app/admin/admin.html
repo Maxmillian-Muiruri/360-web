@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Dashboard</title>
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+    />
+    <style>
+      :root {
+        --sidebar-width: 280px;
+        --sidebar-collapsed-width: 80px;
+        --primary-color: #32529d;
+        --secondary-color: #099309;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background-color: #f8f9fa;
+        overflow-x: hidden;
+      }
+
+      /* Sidebar Styles */
+      .sidebar {
+        width: var(--sidebar-width);
+        min-height: 100vh;
+        background: #2c3e50;
+        position: fixed;
+        top: 0;
+        left: 0;
+        transition: all 0.3s;
+        z-index: 1000;
+      }
+
+      .sidebar.collapsed {
+        width: var(--sidebar-collapsed-width);
+      }
+
+      .sidebar-header {
+        padding: 20px;
+        background: rgba(0, 0, 0, 0.2);
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .sidebar-menu {
+        padding: 0;
+        list-style: none;
+      }
+
+      .sidebar-menu li {
+        position: relative;
+      }
+
+      .sidebar-menu li a {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        color: #ecf0f1;
+        text-decoration: none;
+        transition: all 0.3s;
+      }
+
+      .sidebar-menu li a:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: #fff;
+      }
+
+      .sidebar-menu li a.active {
+        background: var(--primary-color);
+        color: #fff;
+      }
+
+      .sidebar-menu li a i {
+        margin-right: 10px;
+        font-size: 1.2rem;
+        min-width: 25px;
+        text-align: center;
+      }
+
+      .sidebar-menu li a .menu-text {
+        transition: opacity 0.3s;
+      }
+
+      .sidebar.collapsed .menu-text {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        overflow: hidden;
+      }
+
+      .sidebar-menu .submenu {
+        list-style: none;
+        padding-left: 0;
+        background: rgba(0, 0, 0, 0.1);
+        display: none;
+      }
+
+      .sidebar-menu .submenu li a {
+        padding-left: 50px;
+      }
+
+      .sidebar-menu .has-submenu > a::after {
+        content: "\f282";
+        font-family: "bootstrap-icons";
+        position: absolute;
+        right: 20px;
+        transition: transform 0.3s;
+      }
+
+      .sidebar-menu .has-submenu.active > a::after {
+        transform: rotate(90deg);
+      }
+
+      /* Main Content Styles */
+      .main-content {
+        margin-left: var(--sidebar-width);
+        transition: all 0.3s;
+        min-height: 100vh;
+      }
+
+      .main-content.expanded {
+        margin-left: var(--sidebar-collapsed-width);
+      }
+
+      .top-header {
+        background: var(--primary-color);
+        padding: 15px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        position: sticky;
+        top: 0;
+        z-index: 999;
+      }
+
+      .card {
+        border: none;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 20px;
+        transition: transform 0.3s;
+      }
+
+      .card:hover {
+        transform: translateY(-5px);
+      }
+
+      .card-header {
+        background: #fff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+        font-weight: 600;
+      }
+
+      .btn-primary {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+      }
+
+      .btn-primary:hover {
+        background-color: #2a4685;
+        border-color: #2a4685;
+      }
+
+      .btn-success {
+        background-color: var(--secondary-color);
+        border-color: var(--secondary-color);
+      }
+
+      .btn-success:hover {
+        background-color: #088a08;
+        border-color: #088a08;
+      }
+
+      .badge-primary {
+        background-color: var(--primary-color);
+      }
+
+      .badge-success {
+        background-color: var(--secondary-color);
+      }
+
+      /* Form Styles */
+      .form-control,
+      .form-select {
+        border-radius: 5px;
+        padding: 10px 15px;
+        border: 1px solid #ddd;
+      }
+
+      .form-control:focus,
+      .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(50, 82, 157, 0.25);
+      }
+
+      /* Table Styles */
+      .table {
+        margin-bottom: 0;
+      }
+
+      .table th {
+        font-weight: 600;
+        color: #495057;
+        background-color: #f8f9fa;
+      }
+
+      .table-hover tbody tr:hover {
+        background-color: rgba(50, 82, 157, 0.05);
+      }
+
+      /* Responsive Adjustments */
+      @media (max-width: 768px) {
+        .sidebar {
+          transform: translateX(-100%);
+        }
+
+        .sidebar.show {
+          transform: translateX(0);
+        }
+
+        .main-content {
+          margin-left: 0;
+        }
+
+        .main-content.expanded {
+          margin-left: 0;
+        }
+      }
+
+      /* Custom Scrollbar */
+      ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+      }
+
+      ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+      }
+
+      ::-webkit-scrollbar-thumb {
+        background: #aaa;
+        border-radius: 4px;
+      }
+
+      ::-webkit-scrollbar-thumb:hover {
+        background: #888;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+      <div
+        class="sidebar-header d-flex align-items-center justify-content-between"
+      >
+        <div class="d-flex align-items-center">
+          <img
+            src="https://via.placeholder.com/40"
+            alt="Logo"
+            class="rounded-circle me-2"
+          />
+          <span class="text-white fw-bold">Admin Panel</span>
+        </div>
+        <button class="btn btn-link text-white p-0" id="sidebar-toggle">
+          <i class="bi bi-list"></i>
+        </button>
+      </div>
+
+      <ul class="sidebar-menu">
+        <li>
+          <a href="#dashboard" class="active">
+            <i class="bi bi-speedometer2"></i>
+            <span class="menu-text">Dashboard</span>
+          </a>
+        </li>
+
+        <li class="has-submenu">
+          <a href="#products">
+            <i class="bi bi-box-seam"></i>
+            <span class="menu-text">Products</span>
+          </a>
+          <ul class="submenu">
+            <li><a href="#all-products">All Products</a></li>
+            <li><a href="#add-product">Add Product</a></li>
+            <li class="has-submenu">
+              <a href="#categories">Categories</a>
+              <ul class="submenu">
+                <li><a href="#category-1">CC & CVV</a></li>
+                <li><a href="#category-2">Bank Logs</a></li>
+                <li><a href="#category-3">Stealth Accounts</a></li>
+                <li><a href="#category-4">Fullz</a></li>
+                <li><a href="#category-5">Tools</a></li>
+                <li><a href="#category-6">Premium Accounts</a></li>
+                <li><a href="#category-7">PayPal Accounts</a></li>
+                <li><a href="#category-8">Crypto Accounts</a></li>
+                <li><a href="#category-9">Dumps</a></li>
+                <li><a href="#category-10">CashApp</a></li>
+                <li><a href="#category-11">Zelle</a></li>
+                <li><a href="#category-12">Venmo</a></li>
+                <li><a href="#category-13">Western Union</a></li>
+                <li><a href="#category-14">MoneyGram</a></li>
+                <li><a href="#category-15">Gift Cards</a></li>
+                <li><a href="#category-16">Bank Transfers</a></li>
+                <li><a href="#category-17">Tax Refund</a></li>
+                <li><a href="#category-18">Other</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="#cashout-clips">
+            <i class="bi bi-cash-coin"></i>
+            <span class="menu-text">Cashout Clips</span>
+          </a>
+          <ul class="submenu">
+            <li><a href="#all-clips">All Clips</a></li>
+            <li><a href="#add-clip">Add Clip</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="#blog">
+            <i class="bi bi-newspaper"></i>
+            <span class="menu-text">Blog</span>
+          </a>
+          <ul class="submenu">
+            <li><a href="#all-posts">All Posts</a></li>
+            <li><a href="#add-post">Add Post</a></li>
+            <li><a href="#categories">Categories</a></li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="#transfers">
+            <i class="bi bi-arrow-left-right"></i>
+            <span class="menu-text">Transfers</span>
+          </a>
+          <ul class="submenu">
+            <li><a href="#all-transfers">All Transfers</a></li>
+            <li><a href="#add-transfer">Add Transfer</a></li>
+            <li class="has-submenu">
+              <a href="#transfer-categories">Categories</a>
+              <ul class="submenu">
+                <li><a href="#transfer-category-1">Bank Transfer</a></li>
+                <li><a href="#transfer-category-2">Zelle Transfer</a></li>
+                <li><a href="#transfer-category-3">CashApp Transfer</a></li>
+                <li><a href="#transfer-category-4">Venmo Transfer</a></li>
+                <li><a href="#transfer-category-5">PayPal Transfer</a></li>
+                <li><a href="#transfer-category-6">Crypto Transfer</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li class="has-submenu">
+          <a href="#linkable">
+            <i class="bi bi-link-45deg"></i>
+            <span class="menu-text">Linkable</span>
+          </a>
+          <ul class="submenu">
+            <li><a href="#all-linkables">All Linkables</a></li>
+            <li><a href="#add-linkable">Add Linkable</a></li>
+            <li class="has-submenu">
+              <a href="#linkable-categories">Categories</a>
+              <ul class="submenu">
+                <li><a href="#linkable-category-1">Bank Logins</a></li>
+                <li><a href="#linkable-category-2">Credit Cards</a></li>
+                <li><a href="#linkable-category-3">Crypto Accounts</a></li>
+                <li><a href="#linkable-category-4">PayPal Accounts</a></li>
+                <li><a href="#linkable-category-5">E-commerce</a></li>
+                <li><a href="#linkable-category-6">Other</a></li>
+              </ul>
+            </li>
+          </ul>
+        </li>
+
+        <li>
+          <a href="#settings">
+            <i class="bi bi-gear"></i>
+            <span class="menu-text">Settings</span>
+          </a>
+        </li>
+
+        <li>
+          <a href="#logout" class="text-danger">
+            <i class="bi bi-box-arrow-left"></i>
+            <span class="menu-text">Logout</span>
+          </a>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="main-content">
+      <!-- Top Header -->
+      <header class="top-header">
+        <div class="container-fluid">
+          <div class="d-flex justify-content-between align-items-center">
+            <button
+              class="btn btn-link text-white d-md-none"
+              id="mobile-sidebar-toggle"
+            >
+              <i class="bi bi-list"></i>
+            </button>
+
+            <div class="d-flex align-items-center">
+              <div class="input-group ms-3" style="max-width: 300px">
+                <input
+                  type="text"
+                  class="form-control"
+                  placeholder="Search..."
+                />
+                <button class="btn btn-light" type="button">
+                  <i class="bi bi-search"></i>
+                </button>
+              </div>
+            </div>
+
+            <div class="dropdown">
+              <button
+                class="btn btn-link text-white dropdown-toggle d-flex align-items-center"
+                type="button"
+                id="userDropdown"
+                data-bs-toggle="dropdown"
+              >
+                <img
+                  src="https://via.placeholder.com/40"
+                  alt="User"
+                  class="rounded-circle me-2"
+                />
+                <span>Admin User</span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li>
+                  <a class="dropdown-item" href="#profile"
+                    ><i class="bi bi-person me-2"></i> Profile</a
+                  >
+                </li>
+                <li>
+                  <a class="dropdown-item" href="#settings"
+                    ><i class="bi bi-gear me-2"></i> Settings</a
+                  >
+                </li>
+                <li><hr class="dropdown-divider" /></li>
+                <li>
+                  <a class="dropdown-item text-danger" href="#logout"
+                    ><i class="bi bi-box-arrow-left me-2"></i> Logout</a
+                  >
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- Dashboard Content -->
+      <div class="container-fluid p-4">
+        <div class="row mb-4">
+          <div class="col-12">
+            <h2 class="mb-0">Dashboard</h2>
+            <nav aria-label="breadcrumb">
+              <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="#">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">
+                  Dashboard
+                </li>
+              </ol>
+            </nav>
+          </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="row g-4 mb-4">
+          <div class="col-md-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Revenue</h6>
+                    <h3 class="mb-0">$24,780</h3>
+                    <small class="text-success"
+                      ><i class="bi bi-arrow-up"></i> 12.5% from last
+                      week</small
+                    >
+                  </div>
+                  <div class="bg-primary bg-opacity-10 p-3 rounded">
+                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Orders</h6>
+                    <h3 class="mb-0">1,245</h3>
+                    <small class="text-success"
+                      ><i class="bi bi-arrow-up"></i> 8.2% from last week</small
+                    >
+                  </div>
+                  <div class="bg-success bg-opacity-10 p-3 rounded">
+                    <i class="bi bi-cart-check text-success fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Products</h6>
+                    <h3 class="mb-0">342</h3>
+                    <small class="text-success"
+                      ><i class="bi bi-arrow-up"></i> 3.1% from last week</small
+                    >
+                  </div>
+                  <div class="bg-warning bg-opacity-10 p-3 rounded">
+                    <i class="bi bi-box-seam text-warning fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 col-lg-3">
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="text-muted mb-2">Total Customers</h6>
+                    <h3 class="mb-0">856</h3>
+                    <small class="text-success"
+                      ><i class="bi bi-arrow-up"></i> 5.7% from last week</small
+                    >
+                  </div>
+                  <div class="bg-info bg-opacity-10 p-3 rounded">
+                    <i class="bi bi-people text-info fs-4"></i>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="row g-4">
+          <div class="col-lg-8">
+            <div class="card">
+              <div
+                class="card-header d-flex justify-content-between align-items-center"
+              >
+                <h5 class="mb-0">Recent Orders</h5>
+                <a href="#orders" class="btn btn-sm btn-primary">View All</a>
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Order ID</th>
+                        <th>Customer</th>
+                        <th>Product</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>#ORD-001</td>
+                        <td>John Doe</td>
+                        <td>BITPAY KYC VERIFIED ACCOUNT</td>
+                        <td>$250.00</td>
+                        <td><span class="badge bg-success">Completed</span></td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>#ORD-002</td>
+                        <td>Jane Smith</td>
+                        <td>Huntington Bank Login</td>
+                        <td>$250.00</td>
+                        <td>
+                          <span class="badge bg-warning">Processing</span>
+                        </td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>#ORD-003</td>
+                        <td>Mike Johnson</td>
+                        <td>$1000 Zelle Transfer</td>
+                        <td>$150.00</td>
+                        <td><span class="badge bg-danger">Cancelled</span></td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td>#ORD-004</td>
+                        <td>Sarah Wilson</td>
+                        <td>UK VISA Credit Card</td>
+                        <td>$300.00</td>
+                        <td><span class="badge bg-primary">Pending</span></td>
+                        <td>
+                          <button class="btn btn-sm btn-outline-primary">
+                            View
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-lg-4">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">Top Products</h5>
+              </div>
+              <div class="card-body">
+                <div class="list-group">
+                  <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                  >
+                    BITPAY KYC VERIFIED ACCOUNT
+                    <span class="badge bg-primary rounded-pill">45</span>
+                  </a>
+                  <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                  >
+                    Huntington Bank Login
+                    <span class="badge bg-primary rounded-pill">32</span>
+                  </a>
+                  <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                  >
+                    $1000 Zelle Transfer
+                    <span class="badge bg-primary rounded-pill">28</span>
+                  </a>
+                  <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                  >
+                    UK VISA Credit Card
+                    <span class="badge bg-primary rounded-pill">22</span>
+                  </a>
+                  <a
+                    href="#"
+                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
+                  >
+                    CashApp Transfer $500
+                    <span class="badge bg-primary rounded-pill">18</span>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Product Modal -->
+    <div
+      class="modal fade"
+      id="addProductModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Product</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="row">
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Product Title</label>
+                    <input type="text" class="form-control" required />
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select class="form-select" required>
+                      <option value="">Select Category</option>
+                      <option value="cc-cvv">CC & CVV</option>
+                      <option value="bank-logs">Bank Logs</option>
+                      <option value="stealth-accounts">Stealth Accounts</option>
+                      <option value="fullz">Fullz</option>
+                      <option value="tools">Tools</option>
+                      <option value="premium-accounts">Premium Accounts</option>
+                      <option value="paypal-accounts">PayPal Accounts</option>
+                      <option value="crypto-accounts">Crypto Accounts</option>
+                      <option value="dumps">Dumps</option>
+                      <option value="cashapp">CashApp</option>
+                      <option value="zelle">Zelle</option>
+                      <option value="venmo">Venmo</option>
+                      <option value="western-union">Western Union</option>
+                      <option value="moneygram">MoneyGram</option>
+                      <option value="gift-cards">Gift Cards</option>
+                      <option value="bank-transfers">Bank Transfers</option>
+                      <option value="tax-refund">Tax Refund</option>
+                      <option value="other">Other</option>
+                    </select>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Price</label>
+                    <div class="input-group">
+                      <span class="input-group-text">$</span>
+                      <input
+                        type="number"
+                        class="form-control"
+                        step="0.01"
+                        required
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div class="col-md-6">
+                  <div class="mb-3">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-control" rows="5" required></textarea>
+                  </div>
+
+                  <div class="mb-3">
+                    <label class="form-label">Product Image</label>
+                    <input type="file" class="form-control" accept="image/*" />
+                  </div>
+                </div>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary">Add Product</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Transfer Modal -->
+    <div
+      class="modal fade"
+      id="addTransferModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Transfer</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label class="form-label">Transfer Title</label>
+                <input type="text" class="form-control" required />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" required>
+                  <option value="">Select Category</option>
+                  <option value="bank-transfer">Bank Transfer</option>
+                  <option value="zelle-transfer">Zelle Transfer</option>
+                  <option value="cashapp-transfer">CashApp Transfer</option>
+                  <option value="venmo-transfer">Venmo Transfer</option>
+                  <option value="paypal-transfer">PayPal Transfer</option>
+                  <option value="crypto-transfer">Crypto Transfer</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Amount</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" rows="4" required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary">Add Transfer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Linkable Modal -->
+    <div
+      class="modal fade"
+      id="addLinkableModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Linkable</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label class="form-label">Linkable Title</label>
+                <input type="text" class="form-control" required />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Category</label>
+                <select class="form-select" required>
+                  <option value="">Select Category</option>
+                  <option value="bank-logins">Bank Logins</option>
+                  <option value="credit-cards">Credit Cards</option>
+                  <option value="crypto-accounts">Crypto Accounts</option>
+                  <option value="paypal-accounts">PayPal Accounts</option>
+                  <option value="e-commerce">E-commerce</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Price</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" rows="4" required></textarea>
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary">Add Linkable</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Add Cashout Clip Modal -->
+    <div
+      class="modal fade"
+      id="addCashoutClipModal"
+      tabindex="-1"
+      aria-hidden="true"
+    >
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title">Add New Cashout Clip</h5>
+            <button
+              type="button"
+              class="btn-close"
+              data-bs-dismiss="modal"
+              aria-label="Close"
+            ></button>
+          </div>
+          <div class="modal-body">
+            <form>
+              <div class="mb-3">
+                <label class="form-label">Clip Title</label>
+                <input type="text" class="form-control" required />
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Price</label>
+                <div class="input-group">
+                  <span class="input-group-text">$</span>
+                  <input
+                    type="number"
+                    class="form-control"
+                    step="0.01"
+                    required
+                  />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Description</label>
+                <textarea class="form-control" rows="4" required></textarea>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label">Video File</label>
+                <input type="file" class="form-control" accept="video/*" />
+              </div>
+            </form>
+          </div>
+          <div class="modal-footer">
+            <button
+              type="button"
+              class="btn btn-secondary"
+              data-bs-dismiss="modal"
+            >
+              Cancel
+            </button>
+            <button type="button" class="btn btn-primary">Add Clip</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      // Sidebar Toggle
+      document
+        .getElementById("sidebar-toggle")
+        .addEventListener("click", function () {
+          const sidebar = document.getElementById("sidebar");
+          const mainContent = document.getElementById("main-content");
+
+          sidebar.classList.toggle("collapsed");
+          mainContent.classList.toggle("expanded");
+        });
+
+      // Mobile Sidebar Toggle
+      document
+        .getElementById("mobile-sidebar-toggle")
+        .addEventListener("click", function () {
+          const sidebar = document.getElementById("sidebar");
+          sidebar.classList.toggle("show");
+        });
+
+      // Submenu Toggle
+      document.querySelectorAll(".has-submenu > a").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+
+          const submenu = this.nextElementSibling;
+          const parentItem = this.parentElement;
+
+          if (submenu.style.display === "block") {
+            submenu.style.display = "none";
+            parentItem.classList.remove("active");
+          } else {
+            submenu.style.display = "block";
+            parentItem.classList.add("active");
+          }
+        });
+      });
+
+      // Initialize submenu display
+      document.querySelectorAll(".submenu").forEach((submenu) => {
+        submenu.style.display = "none";
+      });
+
+      // Active menu item
+      document.querySelectorAll(".sidebar-menu li a").forEach((link) => {
+        link.addEventListener("click", function () {
+          document.querySelectorAll(".sidebar-menu li a").forEach((item) => {
+            item.classList.remove("active");
+          });
+          this.classList.add("active");
+        });
+      });
+    </script>
+  </body>
+</html>

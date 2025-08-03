@@ -1,0 +1,185 @@
+<!-- Shop Page Content -->
+<main class="py-8">
+  <div class="max-w-7xl mx-auto px-4">
+    <!-- Shop Header -->
+    <div class="text-center mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">Shop</h1>
+    </div>
+
+    <!-- Results Summary -->
+    <div class="flex justify-between items-center mb-6">
+      <p class="text-gray-600">
+        Showing {{ currentPageProducts.length }} of {{ products.length }}
+        products
+      </p>
+      <p class="text-gray-600">Page {{ currentPage }} of {{ totalPages }}</p>
+    </div>
+
+    <!-- Products Grid -->
+    <div
+      class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"
+    >
+      <div
+        *ngFor="let product of currentPageProducts"
+        class="bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden flex flex-col"
+      >
+        <!-- Product Image -->
+        <div class="relative overflow-hidden group">
+          <img
+            [src]="product.image"
+            [alt]="product.alt"
+            class="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300 cursor-pointer"
+            (click)="viewProduct(product)"
+          />
+          <div
+            class="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-20 transition-all duration-300"
+          ></div>
+
+          <!-- Category Badge -->
+          <div class="absolute top-2 left-2">
+            <span class="bg-brand text-white text-xs px-2 py-1 rounded-full">
+              {{ product.category }}
+            </span>
+          </div>
+        </div>
+
+        <!-- Product Content -->
+        <div class="bg-gray-100 p-4 flex-1 flex flex-col">
+          <h3
+            class="text-lg font-semibold text-gray-900 mb-2 cursor-pointer hover:text-brand transition-colors duration-200"
+            (click)="viewProduct(product)"
+          >
+            {{ product.name }}
+          </h3>
+
+          <!-- Category-specific details -->
+          <div class="text-sm text-gray-600 mb-3 flex-1">
+            <div *ngIf="product.balance" class="mb-1">
+              <strong>Balance:</strong> {{ product.balance }}
+            </div>
+            <div *ngIf="product.successRate" class="mb-1">
+              <strong>Success Rate:</strong> {{ product.successRate }}
+            </div>
+            <div *ngIf="product.amount" class="mb-1">
+              <strong>Amount:</strong> {{ product.amount }}
+            </div>
+            <div *ngIf="product.duration" class="mb-1">
+              <strong>Duration:</strong> {{ product.duration }}
+            </div>
+            <div *ngIf="product.quality" class="mb-1">
+              <strong>Quality:</strong> {{ product.quality }}
+            </div>
+            <div *ngIf="product.accountType" class="mb-1">
+              <strong>Type:</strong> {{ product.accountType }}
+            </div>
+            <div *ngIf="product.cardType" class="mb-1">
+              <strong>Card Type:</strong> {{ product.cardType }}
+            </div>
+            <div *ngIf="product.riskLevel" class="mb-1">
+              <strong>Risk Level:</strong> {{ product.riskLevel }}
+            </div>
+            <div *ngIf="product.videoType" class="mb-1">
+              <strong>Video Type:</strong> {{ product.videoType }}
+            </div>
+            <div *ngIf="product.cloneType" class="mb-1">
+              <strong>Clone Type:</strong> {{ product.cloneType }}
+            </div>
+            <div *ngIf="product.compatibility" class="mb-1">
+              <strong>Compatibility:</strong> {{ product.compatibility }}
+            </div>
+            <div *ngIf="product.setup" class="mb-1">
+              <strong>Setup:</strong> {{ product.setup }}
+            </div>
+            <div *ngIf="product.productType" class="mb-1">
+              <strong>Product Type:</strong> {{ product.productType }}
+            </div>
+            <div *ngIf="product.delivery" class="mb-1">
+              <strong>Delivery:</strong> {{ product.delivery }}
+            </div>
+            <div *ngIf="product.checkType" class="mb-1">
+              <strong>Check Type:</strong> {{ product.checkType }}
+            </div>
+            <div *ngIf="product.processing" class="mb-1">
+              <strong>Processing:</strong> {{ product.processing }}
+            </div>
+            <div *ngIf="product.serviceType" class="mb-1">
+              <strong>Service Type:</strong> {{ product.serviceType }}
+            </div>
+            <div *ngIf="product.connection" class="mb-1">
+              <strong>Connection:</strong> {{ product.connection }}
+            </div>
+          </div>
+
+          <!-- Features -->
+          <div
+            *ngIf="product.features && product.features.length > 0"
+            class="mb-3"
+          >
+            <div class="text-xs text-gray-500">
+              <span
+                *ngFor="let feature of product.features.slice(0, 2); let last = last"
+              >
+                {{ feature }}{{ !last ? ' • ' : '' }}
+              </span>
+              <span *ngIf="product.features.length > 2">...</span>
+            </div>
+          </div>
+
+          <!-- Price and Action -->
+          <div class="flex justify-between items-center mt-auto">
+            <span class="text-xl font-bold text-gray-900"
+              >${{ product.price.toFixed(2) }}</span
+            >
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 1" class="flex justify-center mt-12">
+      <nav class="flex items-center space-x-2">
+        <!-- Previous Button -->
+        <button
+          class="px-3 py-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="currentPage === 1"
+          (click)="previousPage()"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+
+        <!-- Page Numbers -->
+        <div class="flex space-x-1">
+          <button
+            *ngFor="let page of pageNumbers"
+            class="px-3 py-2 rounded-md transition-colors duration-200"
+            [class]="page === currentPage ? 'bg-brand text-white' : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'"
+            (click)="goToPage(page)"
+          >
+            {{ page }}
+          </button>
+        </div>
+
+        <!-- Next Button -->
+        <button
+          class="px-3 py-2 rounded-md text-gray-500 hover:text-gray-700 hover:bg-gray-100 transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+          [disabled]="currentPage === totalPages"
+          (click)="nextPage()"
+        >
+          <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path
+              fill-rule="evenodd"
+              d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+              clip-rule="evenodd"
+            ></path>
+          </svg>
+        </button>
+      </nav>
+    </div>
+  </div>
+</main>
