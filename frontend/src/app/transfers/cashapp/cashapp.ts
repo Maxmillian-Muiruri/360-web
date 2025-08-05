@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-cashapp',
@@ -9,79 +12,77 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './cashapp.html',
   styleUrl: './cashapp.css'
 })
-export class Cashapp {
-  products = [
-    {
-      id: 'CASH_TRANSFER001',
-      name: 'CashApp Transfer - $500 USD',
-      category: 'TRANSFERS',
-      price: 75.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$500',
-      alt: 'CashApp $500 Transfer',
-      amount: '$500 USD',
-      speed: 'Instant',
-      country: 'USA'
-    },
-    {
-      id: 'CASH_TRANSFER002',
-      name: 'CashApp Transfer - $1000 USD',
-      category: 'TRANSFERS',
-      price: 140.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$1000',
-      alt: 'CashApp $1000 Transfer',
-      amount: '$1000 USD',
-      speed: 'Instant',
-      country: 'USA'
-    },
-    {
-      id: 'CASH_TRANSFER003',
-      name: 'CashApp Transfer - $2000 USD',
-      category: 'TRANSFERS',
-      price: 250.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$2000',
-      alt: 'CashApp $2000 Transfer',
-      amount: '$2000 USD',
-      speed: '1-2 Hours',
-      country: 'USA'
-    },
-    {
-      id: 'CASH_TRANSFER004',
-      name: 'CashApp Transfer - $5000 USD',
-      category: 'TRANSFERS',
-      price: 550.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$5000',
-      alt: 'CashApp $5000 Transfer',
-      amount: '$5000 USD',
-      speed: 'Same Day',
-      country: 'USA'
-    },
-    {
-      id: 'CASH_TRANSFER005',
-      name: 'CashApp Transfer - $300 USD',
-      category: 'TRANSFERS',
-      price: 50.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$300',
-      alt: 'CashApp $300 Transfer',
-      amount: '$300 USD',
-      speed: 'Instant',
-      country: 'USA'
-    },
-    {
-      id: 'CASH_TRANSFER006',
-      name: 'CashApp Transfer - $750 USD',
-      category: 'TRANSFERS',
-      price: 110.00,
-      image: 'https://via.placeholder.com/300x200/00D632/ffffff?text=CASHAPP+$750',
-      alt: 'CashApp $750 Transfer',
-      amount: '$750 USD',
-      speed: 'Instant',
-      country: 'USA'
-    }
-  ];
+export class Cashapp implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    // Load products from Cashapp Transfers category
+    const filters = { 
+      categoryId: 'cashapp-transfers', // This should match the category ID in your backend
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Cashapp Transfers products from backend:', response.products);
+        console.log('Total products:', response.total);
+      },
+      error: (error) => {
+        console.error('Error loading Cashapp Transfers products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  // View product details - navigate to product page
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    // Navigate to product details page with product ID
     this.router.navigate(['/product', product.id]);
+  }
+
+  // Pagination methods
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

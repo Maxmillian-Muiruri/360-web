@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-carded-products',
@@ -9,83 +12,76 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './carded-products.html',
   styleUrl: './carded-products.css'
 })
-export class CardedProducts {
-  // Carded Products data
-  products = [
-    {
-      id: 'CP001',
-      name: 'Electronics Bundle - Carded',
-      category: 'CARDED PRODUCTS',
-      price: 300.00,
-      image: 'https://via.placeholder.com/300x200/0066cc/ffffff?text=ELECTRONICS',
-      alt: 'Electronics Bundle',
-      productType: 'Electronics',
-      delivery: 'Express',
-      features: ['Latest Models', 'Warranty Included', 'Fast Shipping']
-    },
-    {
-      id: 'CP002',
-      name: 'Fashion Collection - Premium',
-      category: 'CARDED PRODUCTS',
-      price: 250.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=FASHION',
-      alt: 'Fashion Collection',
-      productType: 'Fashion',
-      delivery: 'Standard',
-      features: ['Designer Brands', 'Multiple Sizes', 'Quality Guarantee']
-    },
-    {
-      id: 'CP003',
-      name: 'Gaming Equipment - Pro',
-      category: 'CARDED PRODUCTS',
-      price: 400.00,
-      image: 'https://via.placeholder.com/300x200/9900cc/ffffff?text=GAMING',
-      alt: 'Gaming Equipment',
-      productType: 'Gaming',
-      delivery: 'Express',
-      features: ['Pro Gaming Gear', 'High Performance', 'Setup Included']
-    },
-    {
-      id: 'CP004',
-      name: 'Home & Garden - Complete',
-      category: 'CARDED PRODUCTS',
-      price: 180.00,
-      image: 'https://via.placeholder.com/300x200/00cc00/ffffff?text=HOME+GARDEN',
-      alt: 'Home & Garden',
-      productType: 'Home & Garden',
-      delivery: 'Standard',
-      features: ['Quality Products', 'Installation Guide', 'Customer Support']
-    },
-    {
-      id: 'CP005',
-      name: 'Sports Equipment - Elite',
-      category: 'CARDED PRODUCTS',
-      price: 350.00,
-      image: 'https://via.placeholder.com/300x200/ff6600/ffffff?text=SPORTS',
-      alt: 'Sports Equipment',
-      productType: 'Sports',
-      delivery: 'Express',
-      features: ['Professional Grade', 'Durable Materials', 'Performance Tested']
-    },
-    {
-      id: 'CP006',
-      name: 'Jewelry Collection - Luxury',
-      category: 'CARDED PRODUCTS',
-      price: 600.00,
-      image: 'https://via.placeholder.com/300x200/ffcc00/ffffff?text=JEWELRY',
-      alt: 'Jewelry Collection',
-      productType: 'Jewelry',
-      delivery: 'Premium',
-      features: ['Luxury Items', 'Certified Quality', 'Insurance Included']
-    }
-  ];
+export class CardedProducts implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {}
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing carded product:', product);
-    // Navigate to product details page with product ID
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categorySlug: 'carded-products',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded carded products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading carded products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
   }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+
 }

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-bitcoin-log',
@@ -9,89 +12,74 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './bitcoin-log.html',
   styleUrl: './bitcoin-log.css'
 })
-export class BitcoinLog {
-  // Bitcoin Log products data
-  products = [
-    {
-      id: 'BTC001',
-      name: 'Bitcoin Wallet - 0.5 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 15000.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN',
-      alt: 'Bitcoin Wallet',
-      walletType: 'Hardware',
-      balance: '0.5 BTC',
-      status: 'Secure',
-      features: ['Hardware Security', 'Cold Storage', 'Multi-Sig']
-    },
-    {
-      id: 'BTC002',
-      name: 'Bitcoin Wallet - 0.25 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 7500.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN+MEDIUM',
-      alt: 'Bitcoin Wallet Medium',
-      walletType: 'Software',
-      balance: '0.25 BTC',
-      status: 'Verified',
-      features: ['Software Wallet', 'Mobile Access', 'Backup Keys']
-    },
-    {
-      id: 'BTC003',
-      name: 'Bitcoin Wallet - 0.1 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 3000.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN+SMALL',
-      alt: 'Bitcoin Wallet Small',
-      walletType: 'Mobile',
-      balance: '0.1 BTC',
-      status: 'Verified',
-      features: ['Mobile App', 'Instant Transfers', 'QR Codes']
-    },
-    {
-      id: 'BTC004',
-      name: 'Bitcoin Wallet - 1.0 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 30000.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN+LARGE',
-      alt: 'Bitcoin Wallet Large',
-      walletType: 'Hardware',
-      balance: '1.0 BTC',
-      status: 'Premium',
-      features: ['Premium Hardware', 'Advanced Security', 'Insurance']
-    },
-    {
-      id: 'BTC005',
-      name: 'Bitcoin Wallet - 0.05 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 1500.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN+MINI',
-      alt: 'Bitcoin Wallet Mini',
-      walletType: 'Web',
-      balance: '0.05 BTC',
-      status: 'Verified',
-      features: ['Web Access', 'Easy Setup', 'Quick Transfers']
-    },
-    {
-      id: 'BTC006',
-      name: 'Bitcoin Wallet - 0.75 BTC Balance',
-      category: 'BITCOIN LOG',
-      price: 22500.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=BITCOIN+PREMIUM',
-      alt: 'Bitcoin Wallet Premium',
-      walletType: 'Hardware',
-      balance: '0.75 BTC',
-      status: 'Premium',
-      features: ['Enterprise Security', 'Multi-Currency', '24/7 Support']
-    }
-  ];
+export class BitcoinLog implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {}
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing Bitcoin log:', product);
-    // Navigate to product details page with product ID
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categorySlug: 'bitcoin-log',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded bitcoin log products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading bitcoin log products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-cashapp-log',
@@ -9,89 +12,76 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './cashapp-log.html',
   styleUrl: './cashapp-log.css'
 })
-export class CashappLog {
-  // CashApp Log products data
-  products = [
-    {
-      id: 'CA001',
-      name: 'CashApp Account - $1,500 Balance',
-      category: 'CASHAPP LOG',
-      price: 180.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP',
-      alt: 'CashApp Account',
-      accountType: 'Personal',
-      balance: '$1,500',
-      status: 'Verified',
-      features: ['Instant Transfers', 'Mobile App', 'Cash Card Access']
-    },
-    {
-      id: 'CA002',
-      name: 'CashApp Business Account - $2,800 Balance',
-      category: 'CASHAPP LOG',
-      price: 320.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP+BUSINESS',
-      alt: 'CashApp Business Account',
-      accountType: 'Business',
-      balance: '$2,800',
-      status: 'Verified',
-      features: ['Business Tools', 'High Limits', 'Analytics']
-    },
-    {
-      id: 'CA003',
-      name: 'CashApp Account - $800 Balance',
-      category: 'CASHAPP LOG',
-      price: 100.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP+SMALL',
-      alt: 'CashApp Account Small',
-      accountType: 'Personal',
-      balance: '$800',
-      status: 'Verified',
-      features: ['Instant Transfers', 'Mobile App', 'Email Access']
-    },
-    {
-      id: 'CA004',
-      name: 'CashApp Account - $2,200 Balance',
-      category: 'CASHAPP LOG',
-      price: 260.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP+LARGE',
-      alt: 'CashApp Account Large',
-      accountType: 'Personal',
-      balance: '$2,200',
-      status: 'Verified',
-      features: ['High Limits', 'Cash Card', 'Investment Access']
-    },
-    {
-      id: 'CA005',
-      name: 'CashApp Account - $1,200 Balance',
-      category: 'CASHAPP LOG',
-      price: 140.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP+MEDIUM',
-      alt: 'CashApp Account Medium',
-      accountType: 'Personal',
-      balance: '$1,200',
-      status: 'Verified',
-      features: ['Instant Transfers', 'Mobile App', 'Direct Deposit']
-    },
-    {
-      id: 'CA006',
-      name: 'CashApp Account - $3,500 Balance',
-      category: 'CASHAPP LOG',
-      price: 400.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP+PREMIUM',
-      alt: 'CashApp Account Premium',
-      accountType: 'Premium',
-      balance: '$3,500',
-      status: 'Verified',
-      features: ['Premium Support', 'High Limits', 'All Features']
-    }
-  ];
+export class CashappLog implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {}
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing CashApp log:', product);
-    // Navigate to product details page with product ID
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categorySlug: 'cashapp-log',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded cashapp log products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading cashapp log products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
   }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+
 }

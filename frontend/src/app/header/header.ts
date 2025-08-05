@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { RouterModule, Router } from '@angular/router';
 
 @Component({
   selector: 'app-header',
@@ -11,8 +11,15 @@ import { RouterModule } from '@angular/router';
 export class HeaderComponent {
   cartItemCount: number = 0;
 
+  constructor(private router: Router) {}
+
   toggleCart(): void {
     // TODO: Implement cart toggle functionality
     console.log('Toggle cart clicked');
+  }
+
+  onLoginClick(): void {
+    console.log('Login link clicked - navigating to /login');
+    this.router.navigate(['/login']);
   }
 }

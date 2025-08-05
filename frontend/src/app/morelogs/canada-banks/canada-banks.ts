@@ -1,100 +1,83 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  bankName: string;
-  balance: number;
-  country: string;
-  verification: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-canada-banks',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './canada-banks.html',
   styleUrl: './canada-banks.css'
 })
-export class CanadaBanks {
-  products: Product[] = [
-    {
-      id: 'canadabank-001',
-      name: 'Royal Bank of Canada Account',
-      description: 'RBC bank account with online banking access',
-      price: 2200,
-      category: 'Canada Banks',
-      bankName: 'Royal Bank of Canada',
-      balance: 35000,
-      country: 'Canada',
-      verification: 'Online Access'
-    },
-    {
-      id: 'canadabank-002',
-      name: 'TD Canada Trust Account',
-      description: 'TD Bank account with mobile app access',
-      price: 2400,
-      category: 'Canada Banks',
-      bankName: 'TD Canada Trust',
-      balance: 42000,
-      country: 'Canada',
-      verification: 'Mobile Access'
-    },
-    {
-      id: 'canadabank-003',
-      name: 'Scotiabank Account',
-      description: 'Scotiabank account with international banking',
-      price: 2600,
-      category: 'Canada Banks',
-      bankName: 'Scotiabank',
-      balance: 48000,
-      country: 'Canada',
-      verification: 'International'
-    },
-    {
-      id: 'canadabank-004',
-      name: 'Bank of Montreal Account',
-      description: 'BMO account with investment services',
-      price: 2800,
-      category: 'Canada Banks',
-      bankName: 'Bank of Montreal',
-      balance: 52000,
-      country: 'Canada',
-      verification: 'Investment Access'
-    },
-    {
-      id: 'canadabank-005',
-      name: 'CIBC Account',
-      description: 'CIBC account with credit card access',
-      price: 2000,
-      category: 'Canada Banks',
-      bankName: 'CIBC',
-      balance: 32000,
-      country: 'Canada',
-      verification: 'Credit Access'
-    },
-    {
-      id: 'canadabank-006',
-      name: 'National Bank Account',
-      description: 'National Bank account with premium services',
-      price: 3000,
-      category: 'Canada Banks',
-      bankName: 'National Bank',
-      balance: 55000,
-      country: 'Canada',
-      verification: 'Premium Access'
+export class CanadaBanks implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'canada-banks',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Canada banks products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading Canada banks products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

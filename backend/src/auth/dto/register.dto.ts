@@ -1,5 +1,6 @@
-import { IsString, IsNotEmpty, MinLength, IsEmail, IsOptional, IsEnum } from 'class-validator';
+import { IsString, IsNotEmpty, MinLength, IsEmail, IsOptional, IsEnum, Validate } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Match } from '../decorators/match.decorator';
 
 export enum UserRole {
   USER = 'USER',
@@ -32,6 +33,15 @@ export class RegisterDto {
   @IsNotEmpty()
   @MinLength(6)
   password: string;
+
+  @ApiProperty({
+    description: 'Confirm password',
+    example: 'password123',
+  })
+  @IsString()
+  @IsNotEmpty()
+  @Match('password', { message: 'Passwords do not match' })
+  confirmPassword: string;
 
   @ApiProperty({
     description: 'User role',

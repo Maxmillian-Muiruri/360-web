@@ -1,100 +1,105 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  cardType: string;
-  bank: string;
-  country: string;
-  cvv: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-europe-cards',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './europe-cards.html',
   styleUrl: './europe-cards.css'
 })
-export class EuropeCards {
-  products: Product[] = [
-    {
-      id: 'eurocard-001',
-      name: 'Deutsche Bank Visa',
-      description: 'German Deutsche Bank Visa card with European acceptance',
-      price: 580,
-      category: 'Europe Cards',
-      cardType: 'Visa',
-      bank: 'Deutsche Bank',
-      country: 'Germany',
-      cvv: 'Yes'
-    },
-    {
-      id: 'eurocard-002',
-      name: 'BNP Paribas Mastercard',
-      description: 'French BNP Paribas Mastercard with international benefits',
-      price: 650,
-      category: 'Europe Cards',
-      cardType: 'Mastercard',
-      bank: 'BNP Paribas',
-      country: 'France',
-      cvv: 'Yes'
-    },
-    {
-      id: 'eurocard-003',
-      name: 'Barclays Visa',
-      description: 'UK Barclays Visa card with travel rewards',
-      price: 520,
-      category: 'Europe Cards',
-      cardType: 'Visa',
-      bank: 'Barclays',
-      country: 'UK',
-      cvv: 'Yes'
-    },
-    {
-      id: 'eurocard-004',
-      name: 'Santander Mastercard',
-      description: 'Spanish Santander Mastercard with cashback',
-      price: 480,
-      category: 'Europe Cards',
-      cardType: 'Mastercard',
-      bank: 'Santander',
-      country: 'Spain',
-      cvv: 'Yes'
-    },
-    {
-      id: 'eurocard-005',
-      name: 'UniCredit Visa',
-      description: 'Italian UniCredit Visa card with premium benefits',
-      price: 550,
-      category: 'Europe Cards',
-      cardType: 'Visa',
-      bank: 'UniCredit',
-      country: 'Italy',
-      cvv: 'Yes'
-    },
-    {
-      id: 'eurocard-006',
-      name: 'ING Mastercard',
-      description: 'Dutch ING Mastercard with low fees',
-      price: 420,
-      category: 'Europe Cards',
-      cardType: 'Mastercard',
-      bank: 'ING',
-      country: 'Netherlands',
-      cvv: 'Yes'
+export class EuropeCards implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'europe-cards',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Europe cards products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading Europe cards products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+  getProductImage(product: Product): string {
+    return product.image || 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image';
+  }
+
+  getProductPrice(product: Product): string {
+    return `$${product.price.toFixed(2)}`;
+  }
+
+  isInStock(product: Product): boolean {
+    return product.stockQuantity > 0;
+  }
+
+  getStockStatus(product: Product): string {
+    if (product.stockQuantity > 10) return 'In Stock';
+    if (product.stockQuantity > 0) return `Only ${product.stockQuantity} left`;
+    return 'Out of Stock';
+  }
+
+  getStockStatusClass(product: Product): string {
+    if (product.stockQuantity > 10) return 'text-green-600';
+    if (product.stockQuantity > 0) return 'text-yellow-600';
+    return 'text-red-600';
   }
 }

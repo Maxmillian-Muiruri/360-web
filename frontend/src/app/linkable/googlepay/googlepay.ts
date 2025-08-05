@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-googlepay',
@@ -9,68 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './googlepay.html',
   styleUrl: './googlepay.css'
 })
-export class Googlepay {
-  products = [
-    {
-      id: 'GPAY001',
-      name: 'USA - LINKABLE [DEBIT] | $1800+ USD BAL',
-      category: 'LINKABLES',
-      price: 220.00,
-      image: 'https://via.placeholder.com/300x200/4285F4/ffffff?text=GOOGLE+PAY+DEBIT',
-      alt: 'Google Pay Debit Linkable',
-      balance: '$1800+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'GPAY002',
-      name: 'USA - LINKABLE [CREDIT] | $3000+ USD BAL',
-      category: 'LINKABLES',
-      price: 380.00,
-      image: 'https://via.placeholder.com/300x200/4285F4/ffffff?text=GOOGLE+PAY+CREDIT',
-      alt: 'Google Pay Credit Linkable',
-      balance: '$3000+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    },
-    {
-      id: 'GPAY003',
-      name: 'UK - LINKABLE [DEBIT] | £1500+ GBP BAL',
-      category: 'LINKABLES',
-      price: 200.00,
-      image: 'https://via.placeholder.com/300x200/4285F4/ffffff?text=GOOGLE+PAY+UK',
-      alt: 'Google Pay UK Linkable',
-      balance: '£1500+ GBP',
-      cardType: 'DEBIT',
-      country: 'UK'
-    },
-    {
-      id: 'GPAY004',
-      name: 'UK - LINKABLE [CREDIT] | £2500+ GBP BAL',
-      category: 'LINKABLES',
-      price: 320.00,
-      image: 'https://via.placeholder.com/300x200/4285F4/ffffff?text=GOOGLE+PAY+UK+CREDIT',
-      alt: 'Google Pay UK Credit Linkable',
-      balance: '£2500+ GBP',
-      cardType: 'CREDIT',
-      country: 'UK'
-    },
-    {
-      id: 'GPAY005',
-      name: 'USA - LINKABLE [DEBIT] | $1000+ USD BAL',
-      category: 'LINKABLES',
-      price: 130.00,
-      image: 'https://via.placeholder.com/300x200/4285F4/ffffff?text=GOOGLE+PAY+BASIC',
-      alt: 'Google Pay Basic Linkable',
-      balance: '$1000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    }
-  ];
+export class LinkableGooglepay implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'googlepay-linkables',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded googlepay linkables products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading googlepay linkables products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

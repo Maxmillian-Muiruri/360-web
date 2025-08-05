@@ -1,100 +1,83 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  unionName: string;
-  balance: number;
-  country: string;
-  verification: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-credit-unions',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './credit-unions.html',
   styleUrl: './credit-unions.css'
 })
-export class CreditUnions {
-  products: Product[] = [
-    {
-      id: 'creditunion-001',
-      name: 'Navy Federal Credit Union',
-      description: 'Navy Federal Credit Union account with military benefits',
-      price: 1800,
-      category: 'Credit Union',
-      unionName: 'Navy Federal CU',
-      balance: 28000,
-      country: 'USA',
-      verification: 'Military Access'
-    },
-    {
-      id: 'creditunion-002',
-      name: 'Alliant Credit Union',
-      description: 'Alliant Credit Union high-yield savings account',
-      price: 1600,
-      category: 'Credit Union',
-      unionName: 'Alliant CU',
-      balance: 25000,
-      country: 'USA',
-      verification: 'High Yield'
-    },
-    {
-      id: 'creditunion-003',
-      name: 'PenFed Credit Union',
-      description: 'Pentagon Federal Credit Union with competitive rates',
-      price: 1700,
-      category: 'Credit Union',
-      unionName: 'PenFed CU',
-      balance: 30000,
-      country: 'USA',
-      verification: 'Competitive Rates'
-    },
-    {
-      id: 'creditunion-004',
-      name: 'State Employees Credit Union',
-      description: 'State Employees Credit Union with low fees',
-      price: 1400,
-      category: 'Credit Union',
-      unionName: 'State Employees CU',
-      balance: 22000,
-      country: 'USA',
-      verification: 'Low Fees'
-    },
-    {
-      id: 'creditunion-005',
-      name: 'America First Credit Union',
-      description: 'America First Credit Union with online banking',
-      price: 1500,
-      category: 'Credit Union',
-      unionName: 'America First CU',
-      balance: 26000,
-      country: 'USA',
-      verification: 'Online Access'
-    },
-    {
-      id: 'creditunion-006',
-      name: 'BECU Credit Union',
-      description: 'Boeing Employees Credit Union with member benefits',
-      price: 1900,
-      category: 'Credit Union',
-      unionName: 'BECU',
-      balance: 32000,
-      country: 'USA',
-      verification: 'Member Benefits'
+export class CreditUnions implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'credit-union',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded credit unions products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading credit unions products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

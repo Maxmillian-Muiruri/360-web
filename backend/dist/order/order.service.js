@@ -191,11 +191,34 @@ let OrderService = class OrderService {
             averageOrderValue: averageOrderValue._avg.totalAmount || 0,
         };
     }
+    async deleteOrder(id) {
+        const order = await this.prisma.order.findUnique({
+            where: { id },
+            include: {
+                items: true,
+            },
+        });
+        if (!order) {
+            throw new common_1.NotFoundException(`Order with ID ${id} not found`);
+        }
+        await this.prisma.orderItem.deleteMany({
+            where: { orderId: id },
+        });
+        await this.prisma.order.delete({
+            where: { id },
+        });
+        return { message: 'Order deleted successfully' };
+    }
     mapToOrderResponse(order) {
         return {
             id: order.id,
             orderNumber: order.orderNumber,
             userId: order.userId,
+            user: order.user ? {
+                id: order.user.id,
+                username: order.user.username,
+                email: order.user.email,
+            } : undefined,
             totalAmount: order.totalAmount,
             status: order.status,
             paymentMethod: order.paymentMethod,

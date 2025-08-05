@@ -16,6 +16,9 @@ import { CartModule } from './cart/cart.module';
 import { OrderModule } from './order/order.module';
 import { PaymentModule } from './payment/payment.module';
 import { AnalyticsModule } from './analytics/analytics.module';
+import { UploadModule } from './upload/upload.module';
+import { EmailModule } from './email/email.module';
+import { VideoModule } from './video/video.module';
 import { PrismaModule } from './prisma/prisma.module';
 import appConfig from './config/app.config';
 import jwtConfig from './config/jwt.config';
@@ -49,6 +52,9 @@ import databaseConfig from './config/database.config';
     OrderModule,
     PaymentModule,
     AnalyticsModule,
+    UploadModule,
+    EmailModule,
+    VideoModule,
   ],
   controllers: [AppController],
   providers: [AppService],

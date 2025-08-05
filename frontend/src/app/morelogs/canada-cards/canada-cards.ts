@@ -1,100 +1,83 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  cardType: string;
-  bank: string;
-  country: string;
-  cvv: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-canada-cards',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './canada-cards.html',
   styleUrl: './canada-cards.css'
 })
-export class CanadaCards {
-  products: Product[] = [
-    {
-      id: 'canadacard-001',
-      name: 'RBC Visa Card',
-      description: 'Royal Bank of Canada Visa card with rewards',
-      price: 420,
-      category: 'Canada Cards',
-      cardType: 'Visa',
-      bank: 'Royal Bank of Canada',
-      country: 'Canada',
-      cvv: 'Yes'
-    },
-    {
-      id: 'canadacard-002',
-      name: 'TD Mastercard',
-      description: 'TD Canada Trust Mastercard with cashback',
-      price: 380,
-      category: 'Canada Cards',
-      cardType: 'Mastercard',
-      bank: 'TD Canada Trust',
-      country: 'Canada',
-      cvv: 'Yes'
-    },
-    {
-      id: 'canadacard-003',
-      name: 'Scotiabank Visa',
-      description: 'Scotiabank Visa card with travel benefits',
-      price: 450,
-      category: 'Canada Cards',
-      cardType: 'Visa',
-      bank: 'Scotiabank',
-      country: 'Canada',
-      cvv: 'Yes'
-    },
-    {
-      id: 'canadacard-004',
-      name: 'BMO Mastercard',
-      description: 'Bank of Montreal Mastercard with premium features',
-      price: 520,
-      category: 'Canada Cards',
-      cardType: 'Mastercard',
-      bank: 'Bank of Montreal',
-      country: 'Canada',
-      cvv: 'Yes'
-    },
-    {
-      id: 'canadacard-005',
-      name: 'CIBC Visa',
-      description: 'CIBC Visa card with low APR',
-      price: 350,
-      category: 'Canada Cards',
-      cardType: 'Visa',
-      bank: 'CIBC',
-      country: 'Canada',
-      cvv: 'Yes'
-    },
-    {
-      id: 'canadacard-006',
-      name: 'National Bank Mastercard',
-      description: 'National Bank Mastercard with rewards program',
-      price: 480,
-      category: 'Canada Cards',
-      cardType: 'Mastercard',
-      bank: 'National Bank',
-      country: 'Canada',
-      cvv: 'Yes'
+export class CanadaCards implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'canada-cards',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Canada cards products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading Canada cards products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

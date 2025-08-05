@@ -22,7 +22,7 @@ export class UserService {
   constructor(
     private prisma: PrismaService,
     private configService: ConfigService,
-  ) {}
+  ) { }
 
   // Create a new user (admin only)
   async createUser(createUserDto: CreateUserDto): Promise<UserResponseDto> {

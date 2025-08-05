@@ -8,6 +8,7 @@ import {
   Query,
   UseGuards,
   Request,
+  Delete,
 } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
 import { OrderService } from './order.service';
@@ -19,7 +20,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { AdminGuard } from '../auth/guards/admin.guard';
 
 @ApiTags('orders')
-@Controller('api/orders')
+@Controller('orders')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
@@ -104,5 +105,17 @@ export class OrderController {
     @Body() body: { paymentStatus: PaymentStatus },
   ): Promise<OrderResponseDto> {
     return this.orderService.updatePaymentStatus(id, body.paymentStatus);
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an order (Admin only)' })
+  @ApiResponse({ status: 200, description: 'Order deleted successfully' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @ApiResponse({ status: 403, description: 'Admin access required' })
+  @ApiResponse({ status: 404, description: 'Order not found' })
+  async deleteOrder(@Param('id') id: string): Promise<{ message: string }> {
+    return this.orderService.deleteOrder(id);
   }
 } 

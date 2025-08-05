@@ -1,100 +1,105 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  bankName: string;
-  balance: number;
-  country: string;
-  verification: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-uk-banks',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './uk-banks.html',
   styleUrl: './uk-banks.css'
 })
-export class UkBanks {
-  products: Product[] = [
-    {
-      id: 'ukbank-001',
-      name: 'Barclays Bank Account',
-      description: 'Premium Barclays bank account with online banking access',
-      price: 2800,
-      category: 'UK Banks',
-      bankName: 'Barclays Bank',
-      balance: 42000,
-      country: 'UK',
-      verification: 'Full Access'
-    },
-    {
-      id: 'ukbank-002',
-      name: 'HSBC Bank Account',
-      description: 'HSBC current account with international banking',
-      price: 3200,
-      category: 'UK Banks',
-      bankName: 'HSBC Bank',
-      balance: 55000,
-      country: 'UK',
-      verification: 'International'
-    },
-    {
-      id: 'ukbank-003',
-      name: 'Lloyds Bank Account',
-      description: 'Lloyds Bank account with mobile app access',
-      price: 2400,
-      category: 'UK Banks',
-      bankName: 'Lloyds Bank',
-      balance: 38000,
-      country: 'UK',
-      verification: 'Mobile Access'
-    },
-    {
-      id: 'ukbank-004',
-      name: 'NatWest Bank Account',
-      description: 'NatWest current account with rewards program',
-      price: 2600,
-      category: 'UK Banks',
-      bankName: 'NatWest Bank',
-      balance: 45000,
-      country: 'UK',
-      verification: 'Rewards Access'
-    },
-    {
-      id: 'ukbank-005',
-      name: 'Santander Bank Account',
-      description: 'Santander UK account with cashback benefits',
-      price: 2200,
-      category: 'UK Banks',
-      bankName: 'Santander UK',
-      balance: 35000,
-      country: 'UK',
-      verification: 'Cashback'
-    },
-    {
-      id: 'ukbank-006',
-      name: 'RBS Bank Account',
-      description: 'Royal Bank of Scotland account with premium features',
-      price: 3000,
-      category: 'UK Banks',
-      bankName: 'Royal Bank of Scotland',
-      balance: 48000,
-      country: 'UK',
-      verification: 'Premium Access'
+export class UkBanks implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'uk-banks',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded UK banks products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading UK banks products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+  getProductImage(product: Product): string {
+    return product.image || 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image';
+  }
+
+  getProductPrice(product: Product): string {
+    return `$${product.price.toFixed(2)}`;
+  }
+
+  isInStock(product: Product): boolean {
+    return product.stockQuantity > 0;
+  }
+
+  getStockStatus(product: Product): string {
+    if (product.stockQuantity > 10) return 'In Stock';
+    if (product.stockQuantity > 0) return `Only ${product.stockQuantity} left`;
+    return 'Out of Stock';
+  }
+
+  getStockStatusClass(product: Product): string {
+    if (product.stockQuantity > 10) return 'text-green-600';
+    if (product.stockQuantity > 0) return 'text-yellow-600';
+    return 'text-red-600';
   }
 }

@@ -23,9 +23,16 @@ import { CashappLog } from './category/cashapp-log/cashapp-log';
 import { PaypalLog } from './category/paypal-log/paypal-log';
 import { Linkable } from './category/linkable/linkable';
 import { BitcoinLog } from './category/bitcoin-log/bitcoin-log';
-import { Shop } from './shop/shop';
+import { ShopComponent } from './shop/shop';
 import { Voucher } from './voucher/voucher';
 import { Blog } from './blog/blog';
+import { OrderComponent } from './order/order';
+import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
+import { ConnectionTestComponent } from './connection-test/connection-test';
+
+// Admin Components
+import { Admin } from './admin/admin';
 
 // More Logs Components
 import { UsaBanks } from './morelogs/usa-banks/usa-banks';
@@ -40,12 +47,13 @@ import { AustraliaCards } from './morelogs/australia-cards/australia-cards';
 import { CreditUnions } from './morelogs/credit-unions/credit-unions';
 import { CryptoLogs } from './morelogs/crypto-logs/crypto-logs';
 
+
 // Linkables Components
 import { Cashapp as LinkableCashapp } from './linkable/cashapp/cashapp';
-import { Paypal as LinkablePaypal } from './linkable/paypal/paypal';
-import { Venmo as LinkableVenmo } from './linkable/venmo/venmo';
-import { Applepay } from './linkable/applepay/applepay';
-import { Googlepay } from './linkable/googlepay/googlepay';
+import { LinkablePaypal } from './linkable/paypal/paypal';
+import { LinkableVenmo } from './linkable/venmo/venmo';
+import { LinkableApplepay } from './linkable/applepay/applepay';
+import { LinkableGooglepay } from './linkable/googlepay/googlepay';
 
 // Transfers Components
 import { Cashapp as TransferCashapp } from './transfers/cashapp/cashapp';
@@ -62,8 +70,12 @@ export const routes: Routes = [
   { path: 'cart', component: CartComponent }, // Cart page 
   { path: 'login', component: Login }, // Login page
   { path: 'register', component: Register }, // Register page
-  { path: 'checkout', component: Checkout }, // Checkout page
+  { path: 'checkout', component: Checkout, canActivate: [AuthGuard] }, // Checkout page - protected
   { path: 'cashout-clips', component: CashoutClips }, // Cashout clips page
+  { path: 'test-connections', component: ConnectionTestComponent }, // Connection test page
+  
+  // Admin routes - protected with AdminGuard
+  { path: 'admin', component: Admin, canActivate: [AdminGuard] },
   
   // Category routes
   { path: 'category/cc-cvv', component: CcCvv },
@@ -98,11 +110,11 @@ export const routes: Routes = [
   { path: 'more-logs/crypto-logs', component: CryptoLogs },
   
   // Linkables routes (using actual components)
-  { path: 'linkables/cashapp', component: LinkableCashapp },
-  { path: 'linkables/paypal', component: LinkablePaypal },
-  { path: 'linkables/venmo', component: LinkableVenmo },
-  { path: 'linkables/apple', component: Applepay },
-  { path: 'linkables/googlepay', component: Googlepay },
+  { path: 'linkable/cashapp', component: LinkableCashapp },
+  { path: 'linkable/paypal', component: LinkablePaypal },
+  { path: 'linkable/venmo', component: LinkableVenmo },
+  { path: 'linkable/applepay', component: LinkableApplepay },
+  { path: 'linkable/googlepay', component: LinkableGooglepay },
   
   // Transfers routes (using actual components)
   { path: 'transfers/cashapp', component: TransferCashapp },
@@ -112,10 +124,9 @@ export const routes: Routes = [
   { path: 'transfers/applepay', component: TransferApplepay },
   { path: 'transfers/googlepay', component: TransferGooglepay },
   
-  // Other routes (using home as placeholder)
-  { path: 'shop', component: Shop },
-  { path: 'blog', component: Blog },
+  // Other routes
+  { path: 'shop', component: ShopComponent },
+  { path: 'orders', component: OrderComponent, canActivate: [AuthGuard] }, // Orders page - protected
   { path: 'voucher', component: Voucher },
-  
-  { path: '**', redirectTo: '' } // Redirect any unknown routes to home
+  { path: 'blog', component: Blog },
 ];

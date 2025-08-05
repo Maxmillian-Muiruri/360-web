@@ -37,26 +37,27 @@ let CartService = class CartService {
             },
         });
         if (existingCartItem) {
-            const updatedCartItem = await this.prisma.cart.update({
+            await this.prisma.cart.update({
                 where: { id: existingCartItem.id },
                 data: { quantity: existingCartItem.quantity + quantity },
                 include: {
                     product: true,
                 },
             });
-            return this.mapToCartItemResponse(updatedCartItem);
         }
-        const newCartItem = await this.prisma.cart.create({
-            data: {
-                userId,
-                productId,
-                quantity,
-            },
-            include: {
-                product: true,
-            },
-        });
-        return this.mapToCartItemResponse(newCartItem);
+        else {
+            await this.prisma.cart.create({
+                data: {
+                    userId,
+                    productId,
+                    quantity,
+                },
+                include: {
+                    product: true,
+                },
+            });
+        }
+        return this.getCart(userId);
     }
     async getCart(userId) {
         const cartItems = await this.prisma.cart.findMany({
@@ -66,14 +67,24 @@ let CartService = class CartService {
             },
             orderBy: { createdAt: 'desc' },
         });
-        const items = cartItems.map(item => this.mapToCartItemResponse(item));
-        const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-        const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
+        const items = cartItems.map(item => ({
+            id: item.id,
+            productId: item.productId,
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+            image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : undefined,
+            stockQuantity: item.product.stockQuantity || 0
+        }));
+        const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
         return {
-            items,
-            totalItems,
-            totalPrice,
+            id: userId,
+            userId: userId,
+            items: items,
+            total: total,
             itemCount: items.length,
+            createdAt: new Date(),
+            updatedAt: new Date()
         };
     }
     async updateCartItem(userId, cartItemId, updateCartDto) {
@@ -97,7 +108,7 @@ let CartService = class CartService {
                 product: true,
             },
         });
-        return this.mapToCartItemResponse(updatedCartItem);
+        return this.getCart(userId);
     }
     async removeFromCart(userId, cartItemId) {
         const cartItem = await this.prisma.cart.findFirst({
@@ -112,11 +123,21 @@ let CartService = class CartService {
         await this.prisma.cart.delete({
             where: { id: cartItemId },
         });
+        return this.getCart(userId);
     }
     async clearCart(userId) {
         await this.prisma.cart.deleteMany({
             where: { userId },
         });
+        return {
+            id: userId,
+            userId: userId,
+            items: [],
+            total: 0,
+            itemCount: 0,
+            createdAt: new Date(),
+            updatedAt: new Date()
+        };
     }
     async getCartItemCount(userId) {
         const result = await this.prisma.cart.aggregate({
@@ -126,19 +147,6 @@ let CartService = class CartService {
             },
         });
         return result._sum.quantity || 0;
-    }
-    mapToCartItemResponse(cartItem) {
-        return {
-            id: cartItem.id,
-            productId: cartItem.productId,
-            productName: cartItem.product.name,
-            productPrice: cartItem.product.price,
-            productImage: cartItem.product.image || undefined,
-            quantity: cartItem.quantity,
-            totalPrice: cartItem.product.price * cartItem.quantity,
-            createdAt: cartItem.createdAt,
-            updatedAt: cartItem.updatedAt,
-        };
     }
 };
 exports.CartService = CartService;

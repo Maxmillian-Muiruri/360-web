@@ -40,7 +40,7 @@
         <div
           *ngFor="let product of products"
           class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-          (click)="viewProduct(product.id)"
+          (click)="viewProduct(product)"
         >
           <!-- Product Image Section -->
           <div class="relative p-4">
@@ -56,7 +56,7 @@
             </div>
             <div class="absolute top-2 left-2">
               <span class="bg-gray-700 text-white text-xs px-2 py-1 rounded"
-                >{{ product.category }}</span
+                >{{ ProductUtils.getProductCategory(product) }}</span
               >
             </div>
           </div>
@@ -76,7 +76,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Bank:</span>
-                <span class="font-medium">{{ product.bank }}</span>
+                <span class="font-medium">{{ "Chase" }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Country:</span>
@@ -84,7 +84,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">CVV:</span>
-                <span class="font-medium">{{ product.cvv }}</span>
+                <span class="font-medium">{{ "Yes" }}</span>
               </div>
             </div>
 
@@ -92,7 +92,7 @@
             <div class="mt-auto">
               <div class="text-right">
                 <span class="text-2xl font-bold text-brand"
-                  >${{ product.price.toLocaleString() }}</span
+                  >{{ ProductUtils.getProductPrice(product) }}</span
                 >
               </div>
             </div>

@@ -49,6 +49,7 @@ class OrderResponseDto {
     id;
     orderNumber;
     userId;
+    user;
     totalAmount;
     status;
     paymentMethod;
@@ -71,6 +72,10 @@ __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
 ], OrderResponseDto.prototype, "userId", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", Object)
+], OrderResponseDto.prototype, "user", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)

@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-paypal',
@@ -9,79 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './paypal.html',
   styleUrl: './paypal.css'
 })
-export class Paypal {
-  products = [
-    {
-      id: 'PAYPAL_TRANSFER001',
-      name: 'PayPal Transfer - $400 USD',
-      category: 'TRANSFERS',
-      price: 80.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+$400',
-      alt: 'PayPal $400 Transfer',
-      amount: '$400 USD',
-      speed: 'Instant',
-      country: 'USA'
-    },
-    {
-      id: 'PAYPAL_TRANSFER002',
-      name: 'PayPal Transfer - $800 USD',
-      category: 'TRANSFERS',
-      price: 150.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+$800',
-      alt: 'PayPal $800 Transfer',
-      amount: '$800 USD',
-      speed: 'Instant',
-      country: 'USA'
-    },
-    {
-      id: 'PAYPAL_TRANSFER003',
-      name: 'PayPal Transfer - $1500 USD',
-      category: 'TRANSFERS',
-      price: 280.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+$1500',
-      alt: 'PayPal $1500 Transfer',
-      amount: '$1500 USD',
-      speed: '1-2 Hours',
-      country: 'USA'
-    },
-    {
-      id: 'PAYPAL_TRANSFER004',
-      name: 'PayPal Transfer - £600 GBP',
-      category: 'TRANSFERS',
-      price: 120.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+£600',
-      alt: 'PayPal £600 Transfer',
-      amount: '£600 GBP',
-      speed: 'Instant',
-      country: 'UK'
-    },
-    {
-      id: 'PAYPAL_TRANSFER005',
-      name: 'PayPal Transfer - £1200 GBP',
-      category: 'TRANSFERS',
-      price: 220.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+£1200',
-      alt: 'PayPal £1200 Transfer',
-      amount: '£1200 GBP',
-      speed: 'Same Day',
-      country: 'UK'
-    },
-    {
-      id: 'PAYPAL_TRANSFER006',
-      name: 'PayPal Transfer - $250 USD',
-      category: 'TRANSFERS',
-      price: 55.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+$250',
-      alt: 'PayPal $250 Transfer',
-      amount: '$250 USD',
-      speed: 'Instant',
-      country: 'USA'
-    }
-  ];
+export class Paypal implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'paypal-transfers',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded paypal transfers products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading paypal transfers products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

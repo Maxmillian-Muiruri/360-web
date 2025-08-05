@@ -40,14 +40,14 @@
         <div
           *ngFor="let product of products"
           class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-          (click)="viewProduct(product.id)"
+          (click)="viewProduct(product)"
         >
           <!-- Product Image Section -->
           <div class="relative p-4">
             <div
               class="bg-gray-200 h-48 rounded flex items-center justify-center"
             >
-              <span class="text-gray-500 text-lg">{{ product.bankName }}</span>
+              <span class="text-gray-500 text-lg">{{ product.name }}</span>
             </div>
             <div class="absolute top-2 right-2">
               <span class="bg-red-500 text-white text-xs px-2 py-1 rounded"
@@ -72,21 +72,21 @@
             <div class="space-y-2 mb-4">
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Bank:</span>
-                <span class="font-medium">{{ product.bankName }}</span>
+                <span class="font-medium">{{ product.name }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Balance:</span>
                 <span class="font-medium"
-                  >${{ product.balance.toLocaleString() }}</span
+                  >${{ product.price.toLocaleString() }}</span
                 >
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Country:</span>
-                <span class="font-medium">{{ product.country }}</span>
+                <span class="font-medium">{{ "USA" }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Access:</span>
-                <span class="font-medium">{{ product.verification }}</span>
+                <span class="font-medium">{{ "Verified" }}</span>
               </div>
             </div>
 

@@ -8,23 +8,17 @@ export class CartItemResponseDto {
   productId: string;
 
   @ApiProperty()
-  productName: string;
+  name: string;
 
   @ApiProperty()
-  productPrice: number;
-
-  @ApiProperty()
-  productImage?: string;
+  price: number;
 
   @ApiProperty()
   quantity: number;
 
   @ApiProperty()
-  totalPrice: number;
+  image?: string;
 
   @ApiProperty()
-  createdAt: Date;
-
-  @ApiProperty()
-  updatedAt: Date;
+  stockQuantity: number;
 } 

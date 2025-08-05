@@ -1,100 +1,83 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  cardType: string;
-  bank: string;
-  country: string;
-  cvv: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-usa-cards',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './usa-cards.html',
   styleUrl: './usa-cards.css'
 })
-export class UsaCards {
-  products: Product[] = [
-    {
-      id: 'usacard-001',
-      name: 'Chase Visa Card',
-      description: 'Premium Chase Visa credit card with high limit',
-      price: 450,
-      category: 'USA Cards',
-      cardType: 'Visa',
-      bank: 'Chase Bank',
-      country: 'USA',
-      cvv: 'Yes'
-    },
-    {
-      id: 'usacard-002',
-      name: 'Bank of America Mastercard',
-      description: 'Bank of America Mastercard with cashback rewards',
-      price: 380,
-      category: 'USA Cards',
-      cardType: 'Mastercard',
-      bank: 'Bank of America',
-      country: 'USA',
-      cvv: 'Yes'
-    },
-    {
-      id: 'usacard-003',
-      name: 'Wells Fargo Visa',
-      description: 'Wells Fargo Visa card with travel benefits',
-      price: 520,
-      category: 'USA Cards',
-      cardType: 'Visa',
-      bank: 'Wells Fargo',
-      country: 'USA',
-      cvv: 'Yes'
-    },
-    {
-      id: 'usacard-004',
-      name: 'Citibank Mastercard',
-      description: 'Citibank Mastercard with international acceptance',
-      price: 600,
-      category: 'USA Cards',
-      cardType: 'Mastercard',
-      bank: 'Citibank',
-      country: 'USA',
-      cvv: 'Yes'
-    },
-    {
-      id: 'usacard-005',
-      name: 'US Bank Visa',
-      description: 'US Bank Visa card with low APR',
-      price: 320,
-      category: 'USA Cards',
-      cardType: 'Visa',
-      bank: 'US Bank',
-      country: 'USA',
-      cvv: 'Yes'
-    },
-    {
-      id: 'usacard-006',
-      name: 'PNC Bank Mastercard',
-      description: 'PNC Bank Mastercard with rewards program',
-      price: 410,
-      category: 'USA Cards',
-      cardType: 'Mastercard',
-      bank: 'PNC Bank',
-      country: 'USA',
-      cvv: 'Yes'
+export class UsaCards implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'usa-cards',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded USA cards products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading USA cards products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

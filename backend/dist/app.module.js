@@ -25,6 +25,9 @@ const cart_module_1 = require("./cart/cart.module");
 const order_module_1 = require("./order/order.module");
 const payment_module_1 = require("./payment/payment.module");
 const analytics_module_1 = require("./analytics/analytics.module");
+const upload_module_1 = require("./upload/upload.module");
+const email_module_1 = require("./email/email.module");
+const video_module_1 = require("./video/video.module");
 const prisma_module_1 = require("./prisma/prisma.module");
 const app_config_1 = require("./config/app.config");
 const jwt_config_1 = require("./config/jwt.config");
@@ -61,6 +64,9 @@ exports.AppModule = AppModule = __decorate([
             order_module_1.OrderModule,
             payment_module_1.PaymentModule,
             analytics_module_1.AnalyticsModule,
+            upload_module_1.UploadModule,
+            email_module_1.EmailModule,
+            video_module_1.VideoModule,
         ],
         controllers: [app_controller_1.AppController],
         providers: [app_service_1.AppService],

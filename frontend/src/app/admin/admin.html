@@ -3,628 +3,683 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Admin Dashboard</title>
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+    <title>Admin Dashboard - 360Logz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link
       rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
-    <style>
-      :root {
-        --sidebar-width: 280px;
-        --sidebar-collapsed-width: 80px;
-        --primary-color: #32529d;
-        --secondary-color: #099309;
-      }
-
-      body {
-        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-        background-color: #f8f9fa;
-        overflow-x: hidden;
-      }
-
-      /* Sidebar Styles */
-      .sidebar {
-        width: var(--sidebar-width);
-        min-height: 100vh;
-        background: #2c3e50;
-        position: fixed;
-        top: 0;
-        left: 0;
-        transition: all 0.3s;
-        z-index: 1000;
-      }
-
-      .sidebar.collapsed {
-        width: var(--sidebar-collapsed-width);
-      }
-
-      .sidebar-header {
-        padding: 20px;
-        background: rgba(0, 0, 0, 0.2);
-        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-      }
-
-      .sidebar-menu {
-        padding: 0;
-        list-style: none;
-      }
-
-      .sidebar-menu li {
-        position: relative;
-      }
-
-      .sidebar-menu li a {
-        display: flex;
-        align-items: center;
-        padding: 12px 20px;
-        color: #ecf0f1;
-        text-decoration: none;
-        transition: all 0.3s;
-      }
-
-      .sidebar-menu li a:hover {
-        background: rgba(255, 255, 255, 0.1);
-        color: #fff;
-      }
-
-      .sidebar-menu li a.active {
-        background: var(--primary-color);
-        color: #fff;
-      }
-
-      .sidebar-menu li a i {
-        margin-right: 10px;
-        font-size: 1.2rem;
-        min-width: 25px;
-        text-align: center;
-      }
-
-      .sidebar-menu li a .menu-text {
-        transition: opacity 0.3s;
-      }
-
-      .sidebar.collapsed .menu-text {
-        opacity: 0;
-        width: 0;
-        height: 0;
-        overflow: hidden;
-      }
-
-      .sidebar-menu .submenu {
-        list-style: none;
-        padding-left: 0;
-        background: rgba(0, 0, 0, 0.1);
-        display: none;
-      }
-
-      .sidebar-menu .submenu li a {
-        padding-left: 50px;
-      }
-
-      .sidebar-menu .has-submenu > a::after {
-        content: "\f282";
-        font-family: "bootstrap-icons";
-        position: absolute;
-        right: 20px;
-        transition: transform 0.3s;
-      }
-
-      .sidebar-menu .has-submenu.active > a::after {
-        transform: rotate(90deg);
-      }
-
-      /* Main Content Styles */
-      .main-content {
-        margin-left: var(--sidebar-width);
-        transition: all 0.3s;
-        min-height: 100vh;
-      }
-
-      .main-content.expanded {
-        margin-left: var(--sidebar-collapsed-width);
-      }
-
-      .top-header {
-        background: var(--primary-color);
-        padding: 15px;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        position: sticky;
-        top: 0;
-        z-index: 999;
-      }
-
-      .card {
-        border: none;
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        margin-bottom: 20px;
-        transition: transform 0.3s;
-      }
-
-      .card:hover {
-        transform: translateY(-5px);
-      }
-
-      .card-header {
-        background: #fff;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        font-weight: 600;
-      }
-
-      .btn-primary {
-        background-color: var(--primary-color);
-        border-color: var(--primary-color);
-      }
-
-      .btn-primary:hover {
-        background-color: #2a4685;
-        border-color: #2a4685;
-      }
-
-      .btn-success {
-        background-color: var(--secondary-color);
-        border-color: var(--secondary-color);
-      }
-
-      .btn-success:hover {
-        background-color: #088a08;
-        border-color: #088a08;
-      }
-
-      .badge-primary {
-        background-color: var(--primary-color);
-      }
-
-      .badge-success {
-        background-color: var(--secondary-color);
-      }
-
-      /* Form Styles */
-      .form-control,
-      .form-select {
-        border-radius: 5px;
-        padding: 10px 15px;
-        border: 1px solid #ddd;
-      }
-
-      .form-control:focus,
-      .form-select:focus {
-        border-color: var(--primary-color);
-        box-shadow: 0 0 0 0.25rem rgba(50, 82, 157, 0.25);
-      }
-
-      /* Table Styles */
-      .table {
-        margin-bottom: 0;
-      }
-
-      .table th {
-        font-weight: 600;
-        color: #495057;
-        background-color: #f8f9fa;
-      }
-
-      .table-hover tbody tr:hover {
-        background-color: rgba(50, 82, 157, 0.05);
-      }
-
-      /* Responsive Adjustments */
-      @media (max-width: 768px) {
-        .sidebar {
-          transform: translateX(-100%);
-        }
-
-        .sidebar.show {
-          transform: translateX(0);
-        }
-
-        .main-content {
-          margin-left: 0;
-        }
-
-        .main-content.expanded {
-          margin-left: 0;
-        }
-      }
-
-      /* Custom Scrollbar */
-      ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-      }
-
-      ::-webkit-scrollbar-track {
-        background: #f1f1f1;
-      }
-
-      ::-webkit-scrollbar-thumb {
-        background: #aaa;
-        border-radius: 4px;
-      }
-
-      ::-webkit-scrollbar-thumb:hover {
-        background: #888;
-      }
-    </style>
   </head>
-  <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
+  <body class="bg-gray-50">
+    <div class="flex h-screen">
+      <!-- Sidebar -->
       <div
-        class="sidebar-header d-flex align-items-center justify-content-between"
+        class="bg-gray-900 text-white w-64 flex-shrink-0 transition-all duration-300"
+        [class.w-16]="isSidebarCollapsed"
       >
-        <div class="d-flex align-items-center">
-          <img
-            src="https://via.placeholder.com/40"
-            alt="Logo"
-            class="rounded-circle me-2"
-          />
-          <span class="text-white fw-bold">Admin Panel</span>
+        <!-- Sidebar Header -->
+        <div class="p-4 border-b border-gray-700">
+          <div class="flex items-center justify-between">
+            <div
+              class="flex items-center space-x-3"
+              *ngIf="!isSidebarCollapsed"
+            >
+              <div
+                class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center"
+              >
+                <i class="fas fa-shield-alt text-white text-sm"></i>
+              </div>
+              <span class="font-bold text-lg">Admin</span>
+            </div>
+            <button
+              (click)="toggleSidebar()"
+              class="text-gray-400 hover:text-white"
+            >
+              <i class="fas fa-bars"></i>
+            </button>
+          </div>
         </div>
-        <button class="btn btn-link text-white p-0" id="sidebar-toggle">
-          <i class="bi bi-list"></i>
-        </button>
+
+        <!-- Sidebar Menu -->
+        <nav class="mt-6">
+          <div class="px-4 space-y-2">
+            <!-- Dashboard -->
+            <a
+              (click)="navigateTo('dashboard'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'dashboard'"
+              [class.text-white]="currentSection === 'dashboard'"
+            >
+              <i class="fas fa-tachometer-alt w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Dashboard</span>
+            </a>
+
+            <!-- Products -->
+            <a
+              (click)="navigateTo('products'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'products'"
+              [class.text-white]="currentSection === 'products'"
+            >
+              <i class="fas fa-box w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Products</span>
+            </a>
+
+            <!-- Orders -->
+            <a
+              (click)="navigateTo('orders'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'orders'"
+              [class.text-white]="currentSection === 'orders'"
+            >
+              <i class="fas fa-shopping-cart w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Orders</span>
+            </a>
+
+            <!-- Videos -->
+            <a
+              (click)="navigateTo('videos'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'videos'"
+              [class.text-white]="currentSection === 'videos'"
+            >
+              <i class="fas fa-video w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Videos</span>
+            </a>
+
+            <!-- Users -->
+            <a
+              (click)="navigateTo('users'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'users'"
+              [class.text-white]="currentSection === 'users'"
+            >
+              <i class="fas fa-users w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Users</span>
+            </a>
+
+            <!-- Analytics -->
+            <a
+              (click)="navigateTo('analytics'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'analytics'"
+              [class.text-white]="currentSection === 'analytics'"
+            >
+              <i class="fas fa-chart-bar w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Analytics</span>
+            </a>
+
+            <!-- Settings -->
+            <a
+              (click)="navigateTo('settings'); $event.preventDefault()"
+              class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors cursor-pointer"
+              [class.bg-blue-600]="currentSection === 'settings'"
+              [class.text-white]="currentSection === 'settings'"
+            >
+              <i class="fas fa-cog w-5 h-5"></i>
+              <span class="ml-3" *ngIf="!isSidebarCollapsed">Settings</span>
+            </a>
+          </div>
+        </nav>
+
+        <!-- Sidebar Footer -->
+        <div class="absolute bottom-0 w-full p-4 border-t border-gray-700">
+          <button
+            (click)="logout(); $event.preventDefault()"
+            class="flex items-center px-3 py-2 text-gray-300 rounded-lg hover:bg-gray-800 hover:text-white transition-colors w-full cursor-pointer"
+          >
+            <i class="fas fa-sign-out-alt w-5 h-5"></i>
+            <span class="ml-3" *ngIf="!isSidebarCollapsed">Logout</span>
+          </button>
+        </div>
       </div>
 
-      <ul class="sidebar-menu">
-        <li>
-          <a href="#dashboard" class="active">
-            <i class="bi bi-speedometer2"></i>
-            <span class="menu-text">Dashboard</span>
-          </a>
-        </li>
-
-        <li class="has-submenu">
-          <a href="#products">
-            <i class="bi bi-box-seam"></i>
-            <span class="menu-text">Products</span>
-          </a>
-          <ul class="submenu">
-            <li><a href="#all-products">All Products</a></li>
-            <li><a href="#add-product">Add Product</a></li>
-            <li class="has-submenu">
-              <a href="#categories">Categories</a>
-              <ul class="submenu">
-                <li><a href="#category-1">CC & CVV</a></li>
-                <li><a href="#category-2">Bank Logs</a></li>
-                <li><a href="#category-3">Stealth Accounts</a></li>
-                <li><a href="#category-4">Fullz</a></li>
-                <li><a href="#category-5">Tools</a></li>
-                <li><a href="#category-6">Premium Accounts</a></li>
-                <li><a href="#category-7">PayPal Accounts</a></li>
-                <li><a href="#category-8">Crypto Accounts</a></li>
-                <li><a href="#category-9">Dumps</a></li>
-                <li><a href="#category-10">CashApp</a></li>
-                <li><a href="#category-11">Zelle</a></li>
-                <li><a href="#category-12">Venmo</a></li>
-                <li><a href="#category-13">Western Union</a></li>
-                <li><a href="#category-14">MoneyGram</a></li>
-                <li><a href="#category-15">Gift Cards</a></li>
-                <li><a href="#category-16">Bank Transfers</a></li>
-                <li><a href="#category-17">Tax Refund</a></li>
-                <li><a href="#category-18">Other</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="#cashout-clips">
-            <i class="bi bi-cash-coin"></i>
-            <span class="menu-text">Cashout Clips</span>
-          </a>
-          <ul class="submenu">
-            <li><a href="#all-clips">All Clips</a></li>
-            <li><a href="#add-clip">Add Clip</a></li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="#blog">
-            <i class="bi bi-newspaper"></i>
-            <span class="menu-text">Blog</span>
-          </a>
-          <ul class="submenu">
-            <li><a href="#all-posts">All Posts</a></li>
-            <li><a href="#add-post">Add Post</a></li>
-            <li><a href="#categories">Categories</a></li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="#transfers">
-            <i class="bi bi-arrow-left-right"></i>
-            <span class="menu-text">Transfers</span>
-          </a>
-          <ul class="submenu">
-            <li><a href="#all-transfers">All Transfers</a></li>
-            <li><a href="#add-transfer">Add Transfer</a></li>
-            <li class="has-submenu">
-              <a href="#transfer-categories">Categories</a>
-              <ul class="submenu">
-                <li><a href="#transfer-category-1">Bank Transfer</a></li>
-                <li><a href="#transfer-category-2">Zelle Transfer</a></li>
-                <li><a href="#transfer-category-3">CashApp Transfer</a></li>
-                <li><a href="#transfer-category-4">Venmo Transfer</a></li>
-                <li><a href="#transfer-category-5">PayPal Transfer</a></li>
-                <li><a href="#transfer-category-6">Crypto Transfer</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-
-        <li class="has-submenu">
-          <a href="#linkable">
-            <i class="bi bi-link-45deg"></i>
-            <span class="menu-text">Linkable</span>
-          </a>
-          <ul class="submenu">
-            <li><a href="#all-linkables">All Linkables</a></li>
-            <li><a href="#add-linkable">Add Linkable</a></li>
-            <li class="has-submenu">
-              <a href="#linkable-categories">Categories</a>
-              <ul class="submenu">
-                <li><a href="#linkable-category-1">Bank Logins</a></li>
-                <li><a href="#linkable-category-2">Credit Cards</a></li>
-                <li><a href="#linkable-category-3">Crypto Accounts</a></li>
-                <li><a href="#linkable-category-4">PayPal Accounts</a></li>
-                <li><a href="#linkable-category-5">E-commerce</a></li>
-                <li><a href="#linkable-category-6">Other</a></li>
-              </ul>
-            </li>
-          </ul>
-        </li>
-
-        <li>
-          <a href="#settings">
-            <i class="bi bi-gear"></i>
-            <span class="menu-text">Settings</span>
-          </a>
-        </li>
-
-        <li>
-          <a href="#logout" class="text-danger">
-            <i class="bi bi-box-arrow-left"></i>
-            <span class="menu-text">Logout</span>
-          </a>
-        </li>
-      </ul>
-    </div>
-
-    <!-- Main Content -->
-    <div class="main-content" id="main-content">
-      <!-- Top Header -->
-      <header class="top-header">
-        <div class="container-fluid">
-          <div class="d-flex justify-content-between align-items-center">
-            <button
-              class="btn btn-link text-white d-md-none"
-              id="mobile-sidebar-toggle"
-            >
-              <i class="bi bi-list"></i>
-            </button>
-
-            <div class="d-flex align-items-center">
-              <div class="input-group ms-3" style="max-width: 300px">
-                <input
-                  type="text"
-                  class="form-control"
-                  placeholder="Search..."
-                />
-                <button class="btn btn-light" type="button">
-                  <i class="bi bi-search"></i>
-                </button>
-              </div>
+      <!-- Main Content -->
+      <div class="flex-1 flex flex-col overflow-hidden">
+        <!-- Top Header -->
+        <header class="bg-white shadow-sm border-b border-gray-200">
+          <div class="flex items-center justify-between px-6 py-4">
+            <div>
+              <h1 class="text-2xl font-bold text-gray-900">Admin Dashboard</h1>
+              <p class="text-gray-600">Welcome back, Admin</p>
             </div>
-
-            <div class="dropdown">
-              <button
-                class="btn btn-link text-white dropdown-toggle d-flex align-items-center"
-                type="button"
-                id="userDropdown"
-                data-bs-toggle="dropdown"
-              >
-                <img
-                  src="https://via.placeholder.com/40"
-                  alt="User"
-                  class="rounded-circle me-2"
-                />
-                <span>Admin User</span>
+            <div class="flex items-center space-x-4">
+              <button class="p-2 text-gray-400 hover:text-gray-600">
+                <i class="fas fa-bell"></i>
               </button>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li>
-                  <a class="dropdown-item" href="#profile"
-                    ><i class="bi bi-person me-2"></i> Profile</a
+              <div class="w-8 h-8 bg-gray-300 rounded-full"></div>
+            </div>
+          </div>
+        </header>
+
+        <!-- Page Content -->
+        <main class="flex-1 overflow-y-auto bg-gray-50 p-6">
+          <!-- Dashboard Section -->
+          <div *ngIf="currentSection === 'dashboard'">
+            <!-- Stats Cards -->
+            <div
+              class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8"
+            >
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                    <i class="fas fa-dollar-sign text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Total Revenue
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      ${{ orderStats?.totalRevenue?.toFixed(2) || '0.00' }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <span class="text-green-600 text-sm font-medium">
+                    <i class="fas fa-arrow-up"></i> 12.5%
+                  </span>
+                  <span class="text-gray-600 text-sm">from last month</span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Total Orders
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ orderStats?.totalOrders || 0 }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <span class="text-green-600 text-sm font-medium">
+                    <i class="fas fa-arrow-up"></i> 8.2%
+                  </span>
+                  <span class="text-gray-600 text-sm">from last month</span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                    <i class="fas fa-users text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Total Users</p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ users.length }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <span class="text-green-600 text-sm font-medium">
+                    <i class="fas fa-arrow-up"></i> 15.3%
+                  </span>
+                  <span class="text-gray-600 text-sm">from last month</span>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-box text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Total Products
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ products.length }}
+                    </p>
+                  </div>
+                </div>
+                <div class="mt-4">
+                  <span class="text-green-600 text-sm font-medium">
+                    <i class="fas fa-arrow-up"></i> 5.7%
+                  </span>
+                  <span class="text-gray-600 text-sm">from last month</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Order Status Summary -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                    <i class="fas fa-clock text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Pending Orders
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ orderStats?.pendingOrders || 0 }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-green-100 text-green-600">
+                    <i class="fas fa-check-circle text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Completed Orders
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ orderStats?.completedOrders || 0 }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center">
+                  <div class="p-3 rounded-full bg-red-100 text-red-600">
+                    <i class="fas fa-times-circle text-xl"></i>
+                  </div>
+                  <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">
+                      Cancelled Orders
+                    </p>
+                    <p class="text-2xl font-bold text-gray-900">
+                      {{ orderStats?.cancelledOrders || 0 }}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-200">
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    Recent Orders
+                  </h3>
+                </div>
+                <div class="p-6">
+                  <div *ngIf="orders.length === 0" class="text-center py-4">
+                    <p class="text-gray-600">No orders found</p>
+                  </div>
+                  <div *ngIf="orders.length > 0" class="space-y-4">
+                    <div
+                      *ngFor="let order of orders.slice(0, 5)"
+                      class="flex items-center justify-between"
+                    >
+                      <div>
+                        <p class="font-medium text-gray-900">
+                          {{ order.orderNumber }}
+                        </p>
+                        <p class="text-sm text-gray-600">
+                          {{ order.user?.username || 'Unknown' }} - ${{
+                          order.totalAmount.toFixed(2) }}
+                        </p>
+                      </div>
+                      <span
+                        class="px-2 py-1 text-xs font-medium rounded-full"
+                        [ngClass]="getOrderStatusBadgeClass(order.status)"
+                      >
+                        {{ order.status }}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="bg-white rounded-lg shadow">
+                <div class="p-6 border-b border-gray-200">
+                  <h3 class="text-lg font-semibold text-gray-900">
+                    Quick Actions
+                  </h3>
+                </div>
+                <div class="p-6">
+                  <div class="space-y-3">
+                    <button
+                      (click)="navigateTo('products'); $event.preventDefault()"
+                      class="w-full flex items-center px-4 py-3 text-left text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <i class="fas fa-plus-circle text-blue-600 mr-3"></i>
+                      <span>Add New Product</span>
+                    </button>
+                    <button
+                      (click)="navigateTo('orders'); $event.preventDefault()"
+                      class="w-full flex items-center px-4 py-3 text-left text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <i class="fas fa-eye text-green-600 mr-3"></i>
+                      <span>View All Orders</span>
+                    </button>
+                    <button
+                      (click)="navigateTo('users'); $event.preventDefault()"
+                      class="w-full flex items-center px-4 py-3 text-left text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <i class="fas fa-users text-purple-600 mr-3"></i>
+                      <span>Manage Users</span>
+                    </button>
+                    <button
+                      (click)="navigateTo('analytics'); $event.preventDefault()"
+                      class="w-full flex items-center px-4 py-3 text-left text-gray-700 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors cursor-pointer"
+                    >
+                      <i class="fas fa-chart-bar text-yellow-600 mr-3"></i>
+                      <span>View Analytics</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Products Section -->
+          <div *ngIf="currentSection === 'products'">
+            <div class="bg-white rounded-lg shadow">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    Product Management
+                  </h2>
+                  <button
+                    (click)="showAddProductForm = true"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
                   >
-                </li>
-                <li>
-                  <a class="dropdown-item" href="#settings"
-                    ><i class="bi bi-gear me-2"></i> Settings</a
-                  >
-                </li>
-                <li><hr class="dropdown-divider" /></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="#logout"
-                    ><i class="bi bi-box-arrow-left me-2"></i> Logout</a
-                  >
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      <!-- Dashboard Content -->
-      <div class="container-fluid p-4">
-        <div class="row mb-4">
-          <div class="col-12">
-            <h2 class="mb-0">Dashboard</h2>
-            <nav aria-label="breadcrumb">
-              <ol class="breadcrumb">
-                <li class="breadcrumb-item"><a href="#">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">
-                  Dashboard
-                </li>
-              </ol>
-            </nav>
-          </div>
-        </div>
-
-        <!-- Stats Cards -->
-        <div class="row g-4 mb-4">
-          <div class="col-md-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="text-muted mb-2">Total Revenue</h6>
-                    <h3 class="mb-0">$24,780</h3>
-                    <small class="text-success"
-                      ><i class="bi bi-arrow-up"></i> 12.5% from last
-                      week</small
-                    >
-                  </div>
-                  <div class="bg-primary bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-currency-dollar text-primary fs-4"></i>
-                  </div>
+                    <i class="fas fa-plus mr-2"></i>Add Product
+                  </button>
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div class="col-md-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="text-muted mb-2">Total Orders</h6>
-                    <h3 class="mb-0">1,245</h3>
-                    <small class="text-success"
-                      ><i class="bi bi-arrow-up"></i> 8.2% from last week</small
-                    >
-                  </div>
-                  <div class="bg-success bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-cart-check text-success fs-4"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="text-muted mb-2">Total Products</h6>
-                    <h3 class="mb-0">342</h3>
-                    <small class="text-success"
-                      ><i class="bi bi-arrow-up"></i> 3.1% from last week</small
-                    >
-                  </div>
-                  <div class="bg-warning bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-box-seam text-warning fs-4"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="col-md-6 col-lg-3">
-            <div class="card">
-              <div class="card-body">
-                <div class="d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="text-muted mb-2">Total Customers</h6>
-                    <h3 class="mb-0">856</h3>
-                    <small class="text-success"
-                      ><i class="bi bi-arrow-up"></i> 5.7% from last week</small
-                    >
-                  </div>
-                  <div class="bg-info bg-opacity-10 p-3 rounded">
-                    <i class="bi bi-people text-info fs-4"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Orders -->
-        <div class="row g-4">
-          <div class="col-lg-8">
-            <div class="card">
+              <!-- Add Product Form -->
               <div
-                class="card-header d-flex justify-content-between align-items-center"
+                *ngIf="showAddProductForm"
+                class="p-6 border-b border-gray-200 bg-gray-50"
               >
-                <h5 class="mb-0">Recent Orders</h5>
-                <a href="#orders" class="btn btn-sm btn-primary">View All</a>
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Add New Product
+                </h3>
+                <form (ngSubmit)="addProduct()" class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Product Name *</label
+                      >
+                      <input
+                        type="text"
+                        [(ngModel)]="productForm.name"
+                        name="name"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Category *</label
+                      >
+                      <select
+                        [(ngModel)]="productForm.categoryId"
+                        name="categoryId"
+                        required
+                        [disabled]="isLoadingCategories"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">
+                          {{ isLoadingCategories ? 'Loading categories...' :
+                          'Select Category' }}
+                        </option>
+                        <option
+                          *ngFor="let category of categories"
+                          [value]="category.id"
+                        >
+                          {{ category.name }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Price *</label
+                      >
+                      <input
+                        type="number"
+                        [(ngModel)]="productForm.price"
+                        name="price"
+                        required
+                        min="0"
+                        step="0.01"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Stock Quantity *</label
+                      >
+                      <input
+                        type="number"
+                        [(ngModel)]="productForm.stockQuantity"
+                        name="stockQuantity"
+                        required
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Product Type *</label
+                      >
+                      <select
+                        [(ngModel)]="productForm.productType"
+                        name="productType"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Product Type</option>
+                        <option
+                          *ngFor="let type of productTypeOptions"
+                          [value]="type.value"
+                        >
+                          {{ type.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Product Image</label
+                      >
+                      <input
+                        type="file"
+                        (change)="onFileSelected($event)"
+                        accept="image/*"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div
+                        *ngIf="selectedFile"
+                        class="mt-2 text-sm text-gray-600"
+                      >
+                        Selected: {{ selectedFile.name }}
+                      </div>
+                      <div
+                        *ngIf="uploadProgress > 0 && uploadProgress < 100"
+                        class="mt-2"
+                      >
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            class="bg-blue-600 h-2 rounded-full"
+                            [style.width.%]="uploadProgress"
+                          ></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">
+                          Uploading: {{ uploadProgress }}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Description *</label
+                    >
+                    <textarea
+                      [(ngModel)]="productForm.description"
+                      name="description"
+                      required
+                      rows="4"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    ></textarea>
+                  </div>
+
+                  <div class="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      (click)="resetProductForm()"
+                      class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      [disabled]="isLoading"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {{ isLoading ? 'Adding...' : 'Add Product' }}
+                    </button>
+                  </div>
+                </form>
               </div>
-              <div class="card-body">
-                <div class="table-responsive">
-                  <table class="table table-hover">
-                    <thead>
+
+              <!-- Products Table -->
+              <div class="p-6">
+                <div *ngIf="isLoading" class="text-center py-8">
+                  <div
+                    class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+                  ></div>
+                  <p class="mt-2 text-gray-600">Loading products...</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoading && products.length === 0"
+                  class="text-center py-8"
+                >
+                  <p class="text-gray-600">No products found</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoading && products.length > 0"
+                  class="overflow-x-auto"
+                >
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
                       <tr>
-                        <th>Order ID</th>
-                        <th>Customer</th>
-                        <th>Product</th>
-                        <th>Amount</th>
-                        <th>Status</th>
-                        <th>Action</th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Product
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Category
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Price
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Stock
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Status
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
                       </tr>
                     </thead>
-                    <tbody>
-                      <tr>
-                        <td>#ORD-001</td>
-                        <td>John Doe</td>
-                        <td>BITPAY KYC VERIFIED ACCOUNT</td>
-                        <td>$250.00</td>
-                        <td><span class="badge bg-success">Completed</span></td>
-                        <td>
-                          <button class="btn btn-sm btn-outline-primary">
-                            View
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr *ngFor="let product of products">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                              <img
+                                *ngIf="product.images && product.images.length > 0"
+                                [src]="product.images[0]"
+                                alt="Product"
+                                class="h-10 w-10 rounded-lg object-cover"
+                              />
+                              <div
+                                *ngIf="!product.images || product.images.length === 0"
+                                class="h-10 w-10 bg-gray-200 rounded-lg flex items-center justify-center"
+                              >
+                                <i class="fas fa-image text-gray-400"></i>
+                              </div>
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">
+                                {{ product.name }}
+                              </div>
+                              <div class="text-sm text-gray-500">
+                                {{ product.description | slice:0:50 }}...
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ product.category?.name || 'N/A' }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm font-medium text-gray-900"
+                            >${{ product.price.toFixed(2) }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ product.stockQuantity }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span
+                            class="px-2 py-1 text-xs font-medium rounded-full"
+                            [ngClass]="product.isActive ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'"
+                          >
+                            {{ product.isActive ? 'Active' : 'Inactive' }}
+                          </span>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        >
+                          <button
+                            class="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            <i class="fas fa-edit"></i>
                           </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#ORD-002</td>
-                        <td>Jane Smith</td>
-                        <td>Huntington Bank Login</td>
-                        <td>$250.00</td>
-                        <td>
-                          <span class="badge bg-warning">Processing</span>
-                        </td>
-                        <td>
-                          <button class="btn btn-sm btn-outline-primary">
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#ORD-003</td>
-                        <td>Mike Johnson</td>
-                        <td>$1000 Zelle Transfer</td>
-                        <td>$150.00</td>
-                        <td><span class="badge bg-danger">Cancelled</span></td>
-                        <td>
-                          <button class="btn btn-sm btn-outline-primary">
-                            View
-                          </button>
-                        </td>
-                      </tr>
-                      <tr>
-                        <td>#ORD-004</td>
-                        <td>Sarah Wilson</td>
-                        <td>UK VISA Credit Card</td>
-                        <td>$300.00</td>
-                        <td><span class="badge bg-primary">Pending</span></td>
-                        <td>
-                          <button class="btn btn-sm btn-outline-primary">
-                            View
+                          <button
+                            (click)="deleteProduct(product.id)"
+                            class="text-red-600 hover:text-red-900"
+                          >
+                            <i class="fas fa-trash"></i>
                           </button>
                         </td>
                       </tr>
@@ -635,408 +690,1379 @@
             </div>
           </div>
 
-          <div class="col-lg-4">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="mb-0">Top Products</h5>
+          <!-- Orders Section -->
+          <div *ngIf="currentSection === 'orders'">
+            <div class="bg-white rounded-lg shadow">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    Order Management
+                  </h2>
+                  <div class="flex space-x-3">
+                    <input
+                      type="text"
+                      [(ngModel)]="orderFilters.orderNumber"
+                      (input)="onOrderSearch()"
+                      placeholder="Search by order number..."
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      [(ngModel)]="orderFilters.status"
+                      (change)="onOrderFilter()"
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option
+                        *ngFor="let option of orderStatusOptions"
+                        [value]="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
+                    </select>
+                    <select
+                      [(ngModel)]="orderFilters.paymentStatus"
+                      (change)="onOrderFilter()"
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option
+                        *ngFor="let option of paymentStatusOptions"
+                        [value]="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
+                    </select>
+                    <button
+                      (click)="clearOrderFilters()"
+                      class="px-3 py-2 bg-gray-500 text-white rounded-md hover:bg-gray-600 text-sm"
+                    >
+                      Clear Filters
+                    </button>
+                  </div>
+                </div>
               </div>
-              <div class="card-body">
-                <div class="list-group">
-                  <a
-                    href="#"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  >
-                    BITPAY KYC VERIFIED ACCOUNT
-                    <span class="badge bg-primary rounded-pill">45</span>
-                  </a>
-                  <a
-                    href="#"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  >
-                    Huntington Bank Login
-                    <span class="badge bg-primary rounded-pill">32</span>
-                  </a>
-                  <a
-                    href="#"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  >
-                    $1000 Zelle Transfer
-                    <span class="badge bg-primary rounded-pill">28</span>
-                  </a>
-                  <a
-                    href="#"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  >
-                    UK VISA Credit Card
-                    <span class="badge bg-primary rounded-pill">22</span>
-                  </a>
-                  <a
-                    href="#"
-                    class="list-group-item list-group-item-action d-flex justify-content-between align-items-center"
-                  >
-                    CashApp Transfer $500
-                    <span class="badge bg-primary rounded-pill">18</span>
-                  </a>
+
+              <div class="p-6">
+                <div *ngIf="isLoadingOrders" class="text-center py-8">
+                  <div
+                    class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+                  ></div>
+                  <p class="mt-2 text-gray-600">Loading orders...</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingOrders && orders.length === 0"
+                  class="text-center py-8"
+                >
+                  <p class="text-gray-600">No orders found</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingOrders && orders.length > 0"
+                  class="overflow-x-auto"
+                >
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Order Details
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Customer
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Amount
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Status
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Payment
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Date
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr *ngFor="let order of orders">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                              <div
+                                class="h-10 w-10 bg-blue-100 rounded-full flex items-center justify-center"
+                              >
+                                <i
+                                  class="fas fa-shopping-cart text-blue-600"
+                                ></i>
+                              </div>
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">
+                                {{ order.orderNumber }}
+                              </div>
+                              <div class="text-sm text-gray-500">
+                                {{ getOrderItemsCount(order) }} items
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm text-gray-900">
+                            {{ order.user?.username || 'N/A' }}
+                          </div>
+                          <div class="text-sm text-gray-500">
+                            {{ order.user?.email || 'N/A' }}
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm font-medium text-gray-900">
+                            ${{ order.totalAmount.toFixed(2) }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <select
+                            #statusSelect
+                            [value]="order.status"
+                            (change)="updateOrderStatus(order.id, statusSelect.value)"
+                            class="px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option
+                              *ngFor="let option of orderStatusOptions.slice(1)"
+                              [value]="option.value"
+                            >
+                              {{ option.label }}
+                            </option>
+                          </select>
+                          <br />
+                          <span
+                            class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                            [ngClass]="getOrderStatusBadgeClass(order.status)"
+                          >
+                            {{ order.status }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm text-gray-900">
+                            {{ order.paymentMethod }}
+                          </div>
+                          <select
+                            #paymentStatusSelect
+                            [value]="order.paymentStatus"
+                            (change)="updatePaymentStatus(order.id, paymentStatusSelect.value)"
+                            class="mt-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          >
+                            <option
+                              *ngFor="let option of paymentStatusOptions.slice(1)"
+                              [value]="option.value"
+                            >
+                              {{ option.label }}
+                            </option>
+                          </select>
+                          <br />
+                          <span
+                            class="mt-1 inline-flex px-2 py-1 text-xs font-medium rounded-full"
+                            [ngClass]="getPaymentStatusBadgeClass(order.paymentStatus)"
+                          >
+                            {{ order.paymentStatus }}
+                          </span>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900">
+                            {{ formatDate(order.createdAt) }}
+                          </span>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        >
+                          <button
+                            class="text-blue-600 hover:text-blue-900 mr-3"
+                            title="View Details"
+                          >
+                            <i class="fas fa-eye"></i>
+                          </button>
+                          <button
+                            class="text-green-600 hover:text-green-900 mr-3"
+                            title="Print Invoice"
+                          >
+                            <i class="fas fa-print"></i>
+                          </button>
+                          <button
+                            (click)="deleteOrder(order.id)"
+                            class="text-red-600 hover:text-red-900"
+                            title="Delete Order"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Add Product Modal -->
-    <div
-      class="modal fade"
-      id="addProductModal"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add New Product</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="row">
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Product Title</label>
-                    <input type="text" class="form-control" required />
+          <!-- Videos Section -->
+          <div *ngIf="currentSection === 'videos'">
+            <div class="bg-white rounded-lg shadow">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    Video Management
+                  </h2>
+                  <button
+                    (click)="showAddVideoForm = true"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg transition-colors"
+                  >
+                    <i class="fas fa-plus mr-2"></i>Add Video
+                  </button>
+                </div>
+              </div>
+
+              <!-- Add Video Form -->
+              <div
+                *ngIf="showAddVideoForm"
+                class="p-6 border-b border-gray-200 bg-gray-50"
+              >
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Add New Video
+                </h3>
+                <form (ngSubmit)="addVideo()" class="space-y-4">
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Video Title *</label
+                      >
+                      <input
+                        type="text"
+                        [(ngModel)]="videoForm.title"
+                        name="videoTitle"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Category *</label
+                      >
+                      <select
+                        [(ngModel)]="videoForm.category"
+                        name="videoCategory"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Category</option>
+                        <option
+                          *ngFor="let category of videoCategories"
+                          [value]="category.value"
+                        >
+                          {{ category.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Platform</label
+                      >
+                      <select
+                        [(ngModel)]="videoForm.platform"
+                        name="videoPlatform"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value="">Select Platform</option>
+                        <option
+                          *ngFor="let platform of videoPlatforms"
+                          [value]="platform.value"
+                        >
+                          {{ platform.label }}
+                        </option>
+                      </select>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Status</label
+                      >
+                      <select
+                        [(ngModel)]="videoForm.isActive"
+                        name="videoStatus"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option [value]="true">Active</option>
+                        <option [value]="false">Inactive</option>
+                      </select>
+                    </div>
                   </div>
 
-                  <div class="mb-3">
-                    <label class="form-label">Category</label>
-                    <select class="form-select" required>
-                      <option value="">Select Category</option>
-                      <option value="cc-cvv">CC & CVV</option>
-                      <option value="bank-logs">Bank Logs</option>
-                      <option value="stealth-accounts">Stealth Accounts</option>
-                      <option value="fullz">Fullz</option>
-                      <option value="tools">Tools</option>
-                      <option value="premium-accounts">Premium Accounts</option>
-                      <option value="paypal-accounts">PayPal Accounts</option>
-                      <option value="crypto-accounts">Crypto Accounts</option>
-                      <option value="dumps">Dumps</option>
-                      <option value="cashapp">CashApp</option>
-                      <option value="zelle">Zelle</option>
-                      <option value="venmo">Venmo</option>
-                      <option value="western-union">Western Union</option>
-                      <option value="moneygram">MoneyGram</option>
-                      <option value="gift-cards">Gift Cards</option>
-                      <option value="bank-transfers">Bank Transfers</option>
-                      <option value="tax-refund">Tax Refund</option>
-                      <option value="other">Other</option>
+                  <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1"
+                      >Description</label
+                    >
+                    <textarea
+                      [(ngModel)]="videoForm.description"
+                      name="videoDescription"
+                      rows="3"
+                      class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    ></textarea>
+                  </div>
+
+                  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Video File</label
+                      >
+                      <input
+                        type="file"
+                        (change)="onVideoFileSelected($event)"
+                        accept="video/*"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div
+                        *ngIf="selectedVideoFile"
+                        class="mt-2 text-sm text-gray-600"
+                      >
+                        Selected: {{ selectedVideoFile.name }}
+                      </div>
+                      <div
+                        *ngIf="videoUploadProgress > 0 && videoUploadProgress < 100"
+                        class="mt-2"
+                      >
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            class="bg-blue-600 h-2 rounded-full"
+                            [style.width.%]="videoUploadProgress"
+                          ></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">
+                          Uploading video: {{ videoUploadProgress }}%
+                        </p>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label
+                        class="block text-sm font-medium text-gray-700 mb-1"
+                        >Thumbnail Image</label
+                      >
+                      <input
+                        type="file"
+                        (change)="onThumbnailFileSelected($event)"
+                        accept="image/*"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                      <div
+                        *ngIf="selectedThumbnailFile"
+                        class="mt-2 text-sm text-gray-600"
+                      >
+                        Selected: {{ selectedThumbnailFile.name }}
+                      </div>
+                      <div
+                        *ngIf="thumbnailUploadProgress > 0 && thumbnailUploadProgress < 100"
+                        class="mt-2"
+                      >
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            class="bg-green-600 h-2 rounded-full"
+                            [style.width.%]="thumbnailUploadProgress"
+                          ></div>
+                        </div>
+                        <p class="text-sm text-gray-600 mt-1">
+                          Uploading thumbnail: {{ thumbnailUploadProgress }}%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    class="mt-2 p-3 bg-blue-50 border border-blue-200 rounded-md"
+                  >
+                    <p class="text-sm text-blue-700">
+                      <i class="fas fa-info-circle mr-1"></i>
+                      You can upload either a video file, a thumbnail image, or
+                      both. At least one file is required.
+                    </p>
+                  </div>
+
+                  <div class="flex justify-end space-x-3">
+                    <button
+                      type="button"
+                      (click)="resetVideoForm()"
+                      class="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      type="submit"
+                      [disabled]="isLoading"
+                      class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 disabled:opacity-50"
+                    >
+                      {{ isLoading ? 'Adding...' : 'Add Video' }}
+                    </button>
+                  </div>
+                </form>
+              </div>
+
+              <!-- Videos Table -->
+              <div class="p-6">
+                <div *ngIf="isLoadingVideos" class="text-center py-8">
+                  <div
+                    class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+                  ></div>
+                  <p class="mt-2 text-gray-600">Loading videos...</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingVideos && videos.length === 0"
+                  class="text-center py-8"
+                >
+                  <p class="text-gray-600">No videos found</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingVideos && videos.length > 0"
+                  class="overflow-x-auto"
+                >
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Video
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Title
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Category
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Platform
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Status
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Views
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr *ngFor="let video of videos">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex-shrink-0 h-16 w-24">
+                            <img
+                              *ngIf="video.thumbnailUrl"
+                              [src]="video.thumbnailUrl"
+                              [alt]="video.title"
+                              class="h-16 w-24 object-cover rounded"
+                            />
+                            <div
+                              *ngIf="!video.thumbnailUrl"
+                              class="h-16 w-24 bg-gray-200 rounded flex items-center justify-center"
+                            >
+                              <i class="fas fa-video text-gray-400"></i>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="text-sm font-medium text-gray-900">
+                            {{ video.title }}
+                          </div>
+                          <div class="text-sm text-gray-500">
+                            {{ video.description }}
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span
+                            class="px-2 py-1 text-xs font-medium bg-blue-100 text-blue-800 rounded-full"
+                          >
+                            {{ video.category }}
+                          </span>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          {{ video.platform }}
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <button
+                            (click)="toggleVideoStatus(video.id, !video.isActive)"
+                            class="px-2 py-1 text-xs rounded transition-colors"
+                            [ngClass]="video.isActive ? 'bg-green-100 text-green-700 hover:bg-green-200' : 'bg-red-100 text-red-700 hover:bg-red-200'"
+                          >
+                            {{ video.isActive ? 'Active' : 'Inactive' }}
+                          </button>
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"
+                        >
+                          {{ video.views || 0 }}
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        >
+                          <button
+                            class="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button
+                            (click)="deleteVideo(video.id)"
+                            class="text-red-600 hover:text-red-900"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Users Section -->
+          <div *ngIf="currentSection === 'users'">
+            <div class="bg-white rounded-lg shadow">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    User Management
+                  </h2>
+                  <div class="flex space-x-3">
+                    <input
+                      type="text"
+                      [(ngModel)]="searchTerm"
+                      (input)="onUserSearch()"
+                      placeholder="Search users..."
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                    <select
+                      [(ngModel)]="selectedStatus"
+                      (change)="onStatusFilter()"
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option
+                        *ngFor="let option of statusOptions"
+                        [value]="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
                     </select>
                   </div>
+                </div>
+              </div>
 
-                  <div class="mb-3">
-                    <label class="form-label">Price</label>
-                    <div class="input-group">
-                      <span class="input-group-text">$</span>
-                      <input
-                        type="number"
-                        class="form-control"
-                        step="0.01"
-                        required
-                      />
+              <div class="p-6">
+                <div *ngIf="isLoadingUsers" class="text-center py-8">
+                  <div
+                    class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"
+                  ></div>
+                  <p class="mt-2 text-gray-600">Loading users...</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingUsers && users.length === 0"
+                  class="text-center py-8"
+                >
+                  <p class="text-gray-600">No users found</p>
+                </div>
+
+                <div
+                  *ngIf="!isLoadingUsers && users.length > 0"
+                  class="overflow-x-auto"
+                >
+                  <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                      <tr>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          User
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Email
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Role
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Status
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Country
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Joined
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Last Login
+                        </th>
+                        <th
+                          class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                        >
+                          Actions
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                      <tr *ngFor="let user of users">
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <div class="flex items-center">
+                            <div class="flex-shrink-0 h-10 w-10">
+                              <div
+                                class="h-10 w-10 bg-gray-200 rounded-full flex items-center justify-center"
+                              >
+                                <i class="fas fa-user text-gray-400"></i>
+                              </div>
+                            </div>
+                            <div class="ml-4">
+                              <div class="text-sm font-medium text-gray-900">
+                                {{ getFullName(user) }}
+                              </div>
+                              <div class="text-sm text-gray-500">
+                                @{{ user.username }}
+                              </div>
+                            </div>
+                          </div>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ user.email }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span
+                            class="px-2 py-1 text-xs font-medium rounded-full"
+                            [ngClass]="getRoleBadgeClass(user.role)"
+                          >
+                            {{ user.role }}
+                          </span>
+                          <br />
+                          <select
+                            #roleSelect
+                            [value]="user.role"
+                            (change)="updateUserRole(user.id, roleSelect.value)"
+                            class="mt-1 px-2 py-1 text-xs border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
+                            [disabled]="user.role === 'SUPER_ADMIN'"
+                          >
+                            <option
+                              *ngFor="let option of roleOptions.slice(1)"
+                              [value]="option.value"
+                            >
+                              {{ option.label }}
+                            </option>
+                          </select>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span
+                            class="px-2 py-1 text-xs font-medium rounded-full"
+                            [ngClass]="getStatusBadgeClass(user.isActive)"
+                          >
+                            {{ user.isActive ? 'Active' : 'Suspended' }}
+                          </span>
+                          <br />
+                          <button
+                            class="mt-1 px-2 py-1 text-xs rounded transition-colors"
+                            [ngClass]="user.isActive ? 'bg-red-100 text-red-700 hover:bg-red-200' : 'bg-green-100 text-green-700 hover:bg-green-200'"
+                            (click)="toggleUserStatus(user.id, !user.isActive)"
+                            [disabled]="user.role === 'SUPER_ADMIN'"
+                          >
+                            {{ user.isActive ? 'Suspend' : 'Activate' }}
+                          </button>
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ user.country || 'N/A' }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ user.createdAt | date:'short' }}</span
+                          >
+                        </td>
+                        <td class="px-6 py-4 whitespace-nowrap">
+                          <span class="text-sm text-gray-900"
+                            >{{ user.lastLogin ? (user.lastLogin | date:'short')
+                            : 'Never' }}</span
+                          >
+                        </td>
+                        <td
+                          class="px-6 py-4 whitespace-nowrap text-sm font-medium"
+                        >
+                          <button
+                            class="text-blue-600 hover:text-blue-900 mr-3"
+                          >
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button
+                            (click)="deleteUser(user.id)"
+                            class="text-red-600 hover:text-red-900"
+                            [disabled]="user.role === 'SUPER_ADMIN'"
+                          >
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Analytics Section -->
+          <div *ngIf="currentSection === 'analytics'">
+            <!-- Analytics Header -->
+            <div class="bg-white rounded-lg shadow mb-6">
+              <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                  <h2 class="text-xl font-semibold text-gray-900">
+                    Analytics Dashboard
+                  </h2>
+                  <div class="flex space-x-3">
+                    <select
+                      [(ngModel)]="selectedTimeRange"
+                      (change)="onTimeRangeChange()"
+                      class="px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option
+                        *ngFor="let option of timeRangeOptions"
+                        [value]="option.value"
+                      >
+                        {{ option.label }}
+                      </option>
+                    </select>
+                    <button
+                      (click)="exportAnalytics()"
+                      class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-colors text-sm"
+                    >
+                      <i class="fas fa-download mr-2"></i>Export
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Loading State -->
+            <div *ngIf="isLoadingAnalytics" class="text-center py-12">
+              <div
+                class="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"
+              ></div>
+              <p class="mt-4 text-gray-600">Loading analytics data...</p>
+            </div>
+
+            <!-- Analytics Content -->
+            <div *ngIf="!isLoadingAnalytics && analytics" class="space-y-6">
+              <!-- Key Performance Indicators -->
+              <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Revenue KPI -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-100 text-green-600">
+                      <i class="fas fa-dollar-sign text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-600">
+                        Total Revenue
+                      </p>
+                      <p class="text-2xl font-bold text-gray-900">
+                        ${{ analytics.revenue?.current?.toFixed(2) || '0.00' }}
+                      </p>
+                      <div class="flex items-center mt-1">
+                        <span
+                          class="text-sm"
+                          [ngClass]="getRevenueGrowth() >= 0 ? 'text-green-600' : 'text-red-600'"
+                        >
+                          <i
+                            class="fas"
+                            [ngClass]="getRevenueGrowth() >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"
+                          ></i>
+                          {{ getRevenueGrowth().toFixed(1) }}%
+                        </span>
+                        <span class="text-sm text-gray-600 ml-1"
+                          >vs previous period</span
+                        >
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div class="col-md-6">
-                  <div class="mb-3">
-                    <label class="form-label">Description</label>
-                    <textarea class="form-control" rows="5" required></textarea>
+                <!-- Orders KPI -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-100 text-blue-600">
+                      <i class="fas fa-shopping-cart text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-600">
+                        Total Orders
+                      </p>
+                      <p class="text-2xl font-bold text-gray-900">
+                        {{ analytics.orders?.current || 0 }}
+                      </p>
+                      <div class="flex items-center mt-1">
+                        <span
+                          class="text-sm"
+                          [ngClass]="getOrderGrowth() >= 0 ? 'text-green-600' : 'text-red-600'"
+                        >
+                          <i
+                            class="fas"
+                            [ngClass]="getOrderGrowth() >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"
+                          ></i>
+                          {{ getOrderGrowth().toFixed(1) }}%
+                        </span>
+                        <span class="text-sm text-gray-600 ml-1"
+                          >vs previous period</span
+                        >
+                      </div>
+                    </div>
                   </div>
+                </div>
 
-                  <div class="mb-3">
-                    <label class="form-label">Product Image</label>
-                    <input type="file" class="form-control" accept="image/*" />
+                <!-- Users KPI -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-100 text-purple-600">
+                      <i class="fas fa-users text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-600">
+                        Total Users
+                      </p>
+                      <p class="text-2xl font-bold text-gray-900">
+                        {{ analytics.users?.current || 0 }}
+                      </p>
+                      <div class="flex items-center mt-1">
+                        <span
+                          class="text-sm"
+                          [ngClass]="getUserGrowth() >= 0 ? 'text-green-600' : 'text-red-600'"
+                        >
+                          <i
+                            class="fas"
+                            [ngClass]="getUserGrowth() >= 0 ? 'fa-arrow-up' : 'fa-arrow-down'"
+                          ></i>
+                          {{ getUserGrowth().toFixed(1) }}%
+                        </span>
+                        <span class="text-sm text-gray-600 ml-1"
+                          >vs previous period</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Average Order Value KPI -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100 text-yellow-600">
+                      <i class="fas fa-chart-line text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                      <p class="text-sm font-medium text-gray-600">
+                        Avg Order Value
+                      </p>
+                      <p class="text-2xl font-bold text-gray-900">
+                        ${{ getAverageOrderValue().toFixed(2) }}
+                      </p>
+                      <div class="flex items-center mt-1">
+                        <span class="text-sm text-gray-600"
+                          >Conversion Rate: {{ getConversionRate().toFixed(1)
+                          }}%</span
+                        >
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <button type="button" class="btn btn-primary">Add Product</button>
-          </div>
-        </div>
-      </div>
-    </div>
 
-    <!-- Add Transfer Modal -->
-    <div
-      class="modal fade"
-      id="addTransferModal"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add New Transfer</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="mb-3">
-                <label class="form-label">Transfer Title</label>
-                <input type="text" class="form-control" required />
-              </div>
+              <!-- Business Metrics -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Profit & Performance -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Business Performance
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Profit Margin</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getProfitMargin().toFixed(1) }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Customer Retention Rate</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getCustomerRetentionRate().toFixed(1) }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Customer Lifetime Value</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >${{ getCustomerLifetimeValue().toFixed(2) }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Churn Rate</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getChurnRate().toFixed(1) }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Refund Rate</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getRefundRate().toFixed(1) }}%</span
+                      >
+                    </div>
+                  </div>
+                </div>
 
-              <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select class="form-select" required>
-                  <option value="">Select Category</option>
-                  <option value="bank-transfer">Bank Transfer</option>
-                  <option value="zelle-transfer">Zelle Transfer</option>
-                  <option value="cashapp-transfer">CashApp Transfer</option>
-                  <option value="venmo-transfer">Venmo Transfer</option>
-                  <option value="paypal-transfer">PayPal Transfer</option>
-                  <option value="crypto-transfer">Crypto Transfer</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Amount</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input
-                    type="number"
-                    class="form-control"
-                    step="0.01"
-                    required
-                  />
+                <!-- Customer Satisfaction -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Customer Satisfaction
+                  </h3>
+                  <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Satisfaction Score</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getCustomerSatisfactionScore().toFixed(1)
+                        }}/10</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Avg Response Time</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getAverageResponseTime() }} hours</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Support Tickets</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ analytics.supportTickets || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Resolved Tickets</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ analytics.resolvedTickets || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Resolution Rate</span>
+                      <span class="text-sm font-medium text-gray-900">
+                        {{ analytics.supportTickets > 0 ?
+                        ((analytics.resolvedTickets / analytics.supportTickets)
+                        * 100).toFixed(1) : 0 }}%
+                      </span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" rows="4" required></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <button type="button" class="btn btn-primary">Add Transfer</button>
-          </div>
-        </div>
-      </div>
-    </div>
+              <!-- Top Products & Categories -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Top Products -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Top Products
+                  </h3>
+                  <div class="space-y-3">
+                    <div
+                      *ngFor="let product of getTopProducts(); let i = index"
+                      class="flex items-center justify-between"
+                    >
+                      <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-900 mr-2"
+                          >{{ i + 1 }}.</span
+                        >
+                        <span class="text-sm text-gray-600"
+                          >{{ product.name }}</span
+                        >
+                      </div>
+                      <span class="text-sm font-medium text-gray-900"
+                        >${{ product.revenue?.toFixed(2) || '0.00' }}</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="getTopProducts().length === 0"
+                      class="text-center py-4"
+                    >
+                      <p class="text-gray-500 text-sm">
+                        No product data available
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-    <!-- Add Linkable Modal -->
-    <div
-      class="modal fade"
-      id="addLinkableModal"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add New Linkable</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="mb-3">
-                <label class="form-label">Linkable Title</label>
-                <input type="text" class="form-control" required />
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Category</label>
-                <select class="form-select" required>
-                  <option value="">Select Category</option>
-                  <option value="bank-logins">Bank Logins</option>
-                  <option value="credit-cards">Credit Cards</option>
-                  <option value="crypto-accounts">Crypto Accounts</option>
-                  <option value="paypal-accounts">PayPal Accounts</option>
-                  <option value="e-commerce">E-commerce</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Price</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input
-                    type="number"
-                    class="form-control"
-                    step="0.01"
-                    required
-                  />
+                <!-- Top Categories -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Top Categories
+                  </h3>
+                  <div class="space-y-3">
+                    <div
+                      *ngFor="let category of getTopCategories(); let i = index"
+                      class="flex items-center justify-between"
+                    >
+                      <div class="flex items-center">
+                        <span class="text-sm font-medium text-gray-900 mr-2"
+                          >{{ i + 1 }}.</span
+                        >
+                        <span class="text-sm text-gray-600"
+                          >{{ category.name }}</span
+                        >
+                      </div>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ category.orders || 0 }} orders</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="getTopCategories().length === 0"
+                      class="text-center py-4"
+                    >
+                      <p class="text-gray-500 text-sm">
+                        No category data available
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" rows="4" required></textarea>
-              </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
-            >
-              Cancel
-            </button>
-            <button type="button" class="btn btn-primary">Add Linkable</button>
-          </div>
-        </div>
-      </div>
-    </div>
+              <!-- Order Status & Payment Methods -->
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Order Status Breakdown -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Order Status Breakdown
+                  </h3>
+                  <div class="space-y-3">
+                    <div
+                      *ngFor="let status of getOrderStatusBreakdown()"
+                      class="flex items-center justify-between"
+                    >
+                      <div class="flex items-center">
+                        <div
+                          class="w-3 h-3 rounded-full mr-3"
+                          [ngClass]="{
+                          'bg-green-500': status.status === 'COMPLETED',
+                          'bg-yellow-500': status.status === 'PENDING',
+                          'bg-blue-500': status.status === 'PROCESSING',
+                          'bg-red-500': status.status === 'CANCELLED'
+                        }"
+                        ></div>
+                        <span class="text-sm text-gray-600"
+                          >{{ status.status }}</span
+                        >
+                      </div>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ status.count }}</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="getOrderStatusBreakdown().length === 0"
+                      class="text-center py-4"
+                    >
+                      <p class="text-gray-500 text-sm">
+                        No order status data available
+                      </p>
+                    </div>
+                  </div>
+                </div>
 
-    <!-- Add Cashout Clip Modal -->
-    <div
-      class="modal fade"
-      id="addCashoutClipModal"
-      tabindex="-1"
-      aria-hidden="true"
-    >
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Add New Cashout Clip</h5>
-            <button
-              type="button"
-              class="btn-close"
-              data-bs-dismiss="modal"
-              aria-label="Close"
-            ></button>
-          </div>
-          <div class="modal-body">
-            <form>
-              <div class="mb-3">
-                <label class="form-label">Clip Title</label>
-                <input type="text" class="form-control" required />
-              </div>
-
-              <div class="mb-3">
-                <label class="form-label">Price</label>
-                <div class="input-group">
-                  <span class="input-group-text">$</span>
-                  <input
-                    type="number"
-                    class="form-control"
-                    step="0.01"
-                    required
-                  />
+                <!-- Payment Method Breakdown -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Payment Methods
+                  </h3>
+                  <div class="space-y-3">
+                    <div
+                      *ngFor="let method of getPaymentMethodBreakdown()"
+                      class="flex items-center justify-between"
+                    >
+                      <span class="text-sm text-gray-600"
+                        >{{ method.method }}</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ method.count }} ({{ method.percentage?.toFixed(1)
+                        }}%)</span
+                      >
+                    </div>
+                    <div
+                      *ngIf="getPaymentMethodBreakdown().length === 0"
+                      class="text-center py-4"
+                    >
+                      <p class="text-gray-500 text-sm">
+                        No payment method data available
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">Description</label>
-                <textarea class="form-control" rows="4" required></textarea>
+              <!-- Recent Activity -->
+              <div class="bg-white rounded-lg shadow p-6">
+                <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                  Recent Activity
+                </h3>
+                <div class="space-y-3">
+                  <div
+                    *ngFor="let activity of getRecentActivity()"
+                    class="flex items-center space-x-3"
+                  >
+                    <div class="flex-shrink-0">
+                      <div
+                        class="w-8 h-8 rounded-full flex items-center justify-center"
+                        [ngClass]="{
+                        'bg-green-100 text-green-600': activity.type === 'order',
+                        'bg-blue-100 text-blue-600': activity.type === 'user',
+                        'bg-yellow-100 text-yellow-600': activity.type === 'product'
+                      }"
+                      >
+                        <i
+                          class="fas"
+                          [ngClass]="{
+                          'fa-shopping-cart': activity.type === 'order',
+                          'fa-user': activity.type === 'user',
+                          'fa-box': activity.type === 'product'
+                        }"
+                        ></i>
+                      </div>
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <p class="text-sm text-gray-900">
+                        {{ activity.message }}
+                      </p>
+                      <p class="text-sm text-gray-500">
+                        {{ activity.timestamp | date:'short' }}
+                      </p>
+                    </div>
+                  </div>
+                  <div
+                    *ngIf="getRecentActivity().length === 0"
+                    class="text-center py-4"
+                  >
+                    <p class="text-gray-500 text-sm">No recent activity</p>
+                  </div>
+                </div>
               </div>
 
-              <div class="mb-3">
-                <label class="form-label">Video File</label>
-                <input type="file" class="form-control" accept="video/*" />
+              <!-- System Health -->
+              <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- System Health -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    System Health
+                  </h3>
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Server Status</span>
+                      <span class="text-sm font-medium text-green-600"
+                        >Online</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Database</span>
+                      <span class="text-sm font-medium text-green-600"
+                        >Connected</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Storage</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSystemHealth().storage || '0' }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Memory</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSystemHealth().memory || '0' }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">CPU</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSystemHealth().cpu || '0' }}%</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Security Metrics -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Security
+                  </h3>
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Failed Logins</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSecurityMetrics().failedLogins || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Suspicious Activity</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSecurityMetrics().suspiciousActivity || 0
+                        }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Blocked IPs</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSecurityMetrics().blockedIPs || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">SSL Status</span>
+                      <span class="text-sm font-medium text-green-600"
+                        >Valid</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Last Backup</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSecurityMetrics().lastBackup || 'N/A' }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Marketing Metrics -->
+                <div class="bg-white rounded-lg shadow p-6">
+                  <h3 class="text-lg font-semibold text-gray-900 mb-4">
+                    Marketing
+                  </h3>
+                  <div class="space-y-3">
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Email Opens</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getEmailMarketingMetrics().opens || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Click Rate</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getEmailMarketingMetrics().clickRate || 0 }}%</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600"
+                        >Social Followers</span
+                      >
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSocialMediaMetrics().followers || 0 }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">SEO Ranking</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getSEOmetrics().ranking || 'N/A' }}</span
+                      >
+                    </div>
+                    <div class="flex justify-between items-center">
+                      <span class="text-sm text-gray-600">Traffic Sources</span>
+                      <span class="text-sm font-medium text-gray-900"
+                        >{{ getTrafficSources().length || 0 }}</span
+                      >
+                    </div>
+                  </div>
+                </div>
               </div>
-            </form>
-          </div>
-          <div class="modal-footer">
-            <button
-              type="button"
-              class="btn btn-secondary"
-              data-bs-dismiss="modal"
+            </div>
+
+            <!-- No Analytics Data -->
+            <div
+              *ngIf="!isLoadingAnalytics && !analytics"
+              class="text-center py-12"
             >
-              Cancel
-            </button>
-            <button type="button" class="btn btn-primary">Add Clip</button>
+              <div class="text-gray-500">
+                <i class="fas fa-chart-bar text-4xl mb-4"></i>
+                <p class="text-lg font-medium">No Analytics Data Available</p>
+                <p class="text-sm">
+                  Analytics data will appear here once you have activity in your
+                  system.
+                </p>
+              </div>
+            </div>
           </div>
-        </div>
+
+          <!-- Settings Section -->
+          <div *ngIf="currentSection === 'settings'">
+            <div class="bg-white rounded-lg shadow">
+              <div class="p-6 border-b border-gray-200">
+                <h2 class="text-xl font-semibold text-gray-900">Settings</h2>
+              </div>
+              <div class="p-6">
+                <p class="text-gray-600">Settings will be implemented here.</p>
+              </div>
+            </div>
+          </div>
+        </main>
       </div>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      // Sidebar Toggle
-      document
-        .getElementById("sidebar-toggle")
-        .addEventListener("click", function () {
-          const sidebar = document.getElementById("sidebar");
-          const mainContent = document.getElementById("main-content");
-
-          sidebar.classList.toggle("collapsed");
-          mainContent.classList.toggle("expanded");
-        });
-
-      // Mobile Sidebar Toggle
-      document
-        .getElementById("mobile-sidebar-toggle")
-        .addEventListener("click", function () {
-          const sidebar = document.getElementById("sidebar");
-          sidebar.classList.toggle("show");
-        });
-
-      // Submenu Toggle
-      document.querySelectorAll(".has-submenu > a").forEach((link) => {
-        link.addEventListener("click", function (e) {
-          e.preventDefault();
-
-          const submenu = this.nextElementSibling;
-          const parentItem = this.parentElement;
-
-          if (submenu.style.display === "block") {
-            submenu.style.display = "none";
-            parentItem.classList.remove("active");
-          } else {
-            submenu.style.display = "block";
-            parentItem.classList.add("active");
-          }
-        });
-      });
-
-      // Initialize submenu display
-      document.querySelectorAll(".submenu").forEach((submenu) => {
-        submenu.style.display = "none";
-      });
-
-      // Active menu item
-      document.querySelectorAll(".sidebar-menu li a").forEach((link) => {
-        link.addEventListener("click", function () {
-          document.querySelectorAll(".sidebar-menu li a").forEach((item) => {
-            item.classList.remove("active");
-          });
-          this.classList.add("active");
-        });
-      });
-    </script>
   </body>
 </html>

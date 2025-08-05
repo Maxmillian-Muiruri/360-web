@@ -1,100 +1,105 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  cardType: string;
-  bank: string;
-  country: string;
-  cvv: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-africa-cards',
-  standalone: true,
   imports: [RouterModule, CommonModule, SidebarComponent],
   templateUrl: './africa-cards.html',
   styleUrl: './africa-cards.css'
 })
-export class AfricaCards {
-  products: Product[] = [
-    {
-      id: 'africacard-001',
-      name: 'Standard Bank Visa',
-      description: 'Standard Bank South Africa Visa card',
-      price: 350,
-      category: 'Africa Cards',
-      cardType: 'Visa',
-      bank: 'Standard Bank',
-      country: 'South Africa',
-      cvv: 'Yes'
-    },
-    {
-      id: 'africacard-002',
-      name: 'First National Bank Mastercard',
-      description: 'FNB Mastercard with rewards program',
-      price: 320,
-      category: 'Africa Cards',
-      cardType: 'Mastercard',
-      bank: 'First National Bank',
-      country: 'South Africa',
-      cvv: 'Yes'
-    },
-    {
-      id: 'africacard-003',
-      name: 'Absa Bank Visa',
-      description: 'Absa Bank Visa card with travel benefits',
-      price: 380,
-      category: 'Africa Cards',
-      cardType: 'Visa',
-      bank: 'Absa Bank',
-      country: 'South Africa',
-      cvv: 'Yes'
-    },
-    {
-      id: 'africacard-004',
-      name: 'Nedbank Mastercard',
-      description: 'Nedbank Mastercard with cashback rewards',
-      price: 340,
-      category: 'Africa Cards',
-      cardType: 'Mastercard',
-      bank: 'Nedbank',
-      country: 'South Africa',
-      cvv: 'Yes'
-    },
-    {
-      id: 'africacard-005',
-      name: 'Access Bank Visa',
-      description: 'Access Bank Nigeria Visa card',
-      price: 280,
-      category: 'Africa Cards',
-      cardType: 'Visa',
-      bank: 'Access Bank',
-      country: 'Nigeria',
-      cvv: 'Yes'
-    },
-    {
-      id: 'africacard-006',
-      name: 'GT Bank Mastercard',
-      description: 'Guaranty Trust Bank Mastercard',
-      price: 300,
-      category: 'Africa Cards',
-      cardType: 'Mastercard',
-      bank: 'GT Bank',
-      country: 'Nigeria',
-      cvv: 'Yes'
+export class AfricaCards implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'africa-cards',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Africa cards products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading Africa cards products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+  getProductImage(product: Product): string {
+    return product.image || 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image';
+  }
+
+  getProductPrice(product: Product): string {
+    return `$${product.price.toFixed(2)}`;
+  }
+
+  isInStock(product: Product): boolean {
+    return product.stockQuantity > 0;
+  }
+
+  getStockStatus(product: Product): string {
+    if (product.stockQuantity > 10) return 'In Stock';
+    if (product.stockQuantity > 0) return `Only ${product.stockQuantity} left`;
+    return 'Out of Stock';
+  }
+
+  getStockStatusClass(product: Product): string {
+    if (product.stockQuantity > 10) return 'text-green-600';
+    if (product.stockQuantity > 0) return 'text-yellow-600';
+    return 'text-red-600';
   }
 }

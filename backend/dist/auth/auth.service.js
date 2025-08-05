@@ -24,23 +24,20 @@ let AuthService = class AuthService {
         this.jwtService = jwtService;
         this.configService = configService;
     }
-    async validateUser(username, password) {
+    async validateUser(email, password) {
         const user = await this.prisma.user.findFirst({
             where: {
-                OR: [
-                    { username },
-                    { email: username },
-                ],
+                email: email,
             },
         });
-        if (user && await bcrypt.compare(password, user.password)) {
+        if (user && (await bcrypt.compare(password, user.password))) {
             const { password, ...result } = user;
             return result;
         }
         return null;
     }
     async login(loginDto) {
-        const user = await this.validateUser(loginDto.username, loginDto.password);
+        const user = await this.validateUser(loginDto.email, loginDto.password);
         if (!user) {
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
@@ -71,10 +68,7 @@ let AuthService = class AuthService {
     async register(registerDto) {
         const existingUser = await this.prisma.user.findFirst({
             where: {
-                OR: [
-                    { username: registerDto.username },
-                    { email: registerDto.email },
-                ],
+                OR: [{ username: registerDto.username }, { email: registerDto.email }],
             },
         });
         if (existingUser) {

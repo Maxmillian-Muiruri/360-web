@@ -41,7 +41,6 @@
     "cloudinary": "^2.7.0",
     "compression": "^1.8.1",
     "cors": "^2.8.5",
-    "handlebars": "^4.7.8",
     "helmet": "^8.1.0",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5",

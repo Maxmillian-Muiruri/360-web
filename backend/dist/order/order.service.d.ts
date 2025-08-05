@@ -28,5 +28,8 @@ export declare class OrderService {
         totalRevenue: number;
         averageOrderValue: number;
     }>;
+    deleteOrder(id: string): Promise<{
+        message: string;
+    }>;
     private mapToOrderResponse;
 }

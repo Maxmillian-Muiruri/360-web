@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-cashapp',
@@ -9,79 +12,77 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './cashapp.html',
   styleUrl: './cashapp.css'
 })
-export class Cashapp {
-  products = [
-    {
-      id: 'CASH001',
-      name: 'USA - LINKABLE [DEBIT] | $2000+ USD BAL',
-      category: 'LINKABLES',
-      price: 250.00,
-      image: 'https://lh3.googleusercontent.com/d/1tIhQQKCDcuaWJteK-2j0TZMEnQfSaEeF',
-      alt: 'CashApp Debit Linkable',
-      balance: '$2000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'CASH002',
-      name: 'USA - LINKABLE [DEBIT] | $3000+ USD BAL',
-      category: 'LINKABLES',
-      price: 350.00,
-      image: 'https://lh3.googleusercontent.com/d/1sh2UYUjY2uKk6r8AjyrjLgWrAaN2X2Ko',
-      alt: 'CashApp Debit Linkable',
-      balance: '$3000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'CASH003',
-      name: 'USA - LINKABLE [DEBIT] | $5000+ USD BAL',
-      category: 'LINKABLES',
-      price: 550.00,
-      image: 'https://lh3.googleusercontent.com/d/1REVw7pmlgr-IZmwN7qFScZaEdUGSeM27',
-      alt: 'CashApp Debit Linkable',
-      balance: '$5000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'CASH004',
-      name: 'USA - LINKABLE [CREDIT] | $3000+ USD BAL',
-      category: 'LINKABLES',
-      price: 350.00,
-      image: 'https://lh3.googleusercontent.com/d/16DZREHenPqTVKzjYQRjBOqkNCZ_FxnGx',
-      alt: 'CashApp Credit Linkable',
-      balance: '$3000+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    },
-    {
-      id: 'CASH005',
-      name: 'USA - LINKABLE [CREDIT] | $6000+ USD BAL',
-      category: 'LINKABLES',
-      price: 650.00,
-      image: 'https://lh3.googleusercontent.com/d/1wtIg3GK3n352K_jSphdWCt2bP37AV3gQ',
-      alt: 'CashApp Credit Linkable',
-      balance: '$6000+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    },
-    {
-      id: 'CASH006',
-      name: 'USA - LINKABLE [DEBIT] | $1000+ USD BAL',
-      category: 'LINKABLES',
-      price: 150.00,
-      image: 'https://lh3.googleusercontent.com/d/17OFNoKr13LN7m98XveTjQlIDwbGDo83B',
-      alt: 'CashApp Debit Linkable',
-      balance: '$1000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    }
-  ];
+export class Cashapp implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    // Load products from Cashapp Linkables category
+    const filters = { 
+      categoryId: 'cashapp-linkables', // This should match the category ID in your backend
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded Cashapp Linkables products from backend:', response.products);
+        console.log('Total products:', response.total);
+      },
+      error: (error) => {
+        console.error('Error loading Cashapp Linkables products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  // View product details - navigate to product page
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    // Navigate to product details page with product ID
     this.router.navigate(['/product', product.id]);
+  }
+
+  // Pagination methods
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

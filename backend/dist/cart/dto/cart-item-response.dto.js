@@ -14,13 +14,11 @@ const swagger_1 = require("@nestjs/swagger");
 class CartItemResponseDto {
     id;
     productId;
-    productName;
-    productPrice;
-    productImage;
+    name;
+    price;
     quantity;
-    totalPrice;
-    createdAt;
-    updatedAt;
+    image;
+    stockQuantity;
 }
 exports.CartItemResponseDto = CartItemResponseDto;
 __decorate([
@@ -34,29 +32,21 @@ __decorate([
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", String)
-], CartItemResponseDto.prototype, "productName", void 0);
+], CartItemResponseDto.prototype, "name", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
-], CartItemResponseDto.prototype, "productPrice", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", String)
-], CartItemResponseDto.prototype, "productImage", void 0);
+], CartItemResponseDto.prototype, "price", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
 ], CartItemResponseDto.prototype, "quantity", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)(),
+    __metadata("design:type", String)
+], CartItemResponseDto.prototype, "image", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)(),
     __metadata("design:type", Number)
-], CartItemResponseDto.prototype, "totalPrice", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", Date)
-], CartItemResponseDto.prototype, "createdAt", void 0);
-__decorate([
-    (0, swagger_1.ApiProperty)(),
-    __metadata("design:type", Date)
-], CartItemResponseDto.prototype, "updatedAt", void 0);
+], CartItemResponseDto.prototype, "stockQuantity", void 0);
 //# sourceMappingURL=cart-item-response.dto.js.map

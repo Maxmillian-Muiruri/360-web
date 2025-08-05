@@ -8,7 +8,7 @@ export declare class AuthService {
     private jwtService;
     private configService;
     constructor(prisma: PrismaService, jwtService: JwtService, configService: ConfigService);
-    validateUser(username: string, password: string): Promise<any>;
+    validateUser(email: string, password: string): Promise<any>;
     login(loginDto: LoginDto): Promise<{
         user: {
             id: any;
@@ -22,8 +22,8 @@ export declare class AuthService {
         refresh_token: string;
     }>;
     register(registerDto: RegisterDto): Promise<{
-        username: string;
         email: string | null;
+        username: string;
         role: import(".prisma/client").$Enums.UserRole;
         firstName: string | null;
         lastName: string | null;

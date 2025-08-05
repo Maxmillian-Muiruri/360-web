@@ -11,6 +11,11 @@ export declare class OrderResponseDto {
     id: string;
     orderNumber: string;
     userId: string;
+    user?: {
+        id: string;
+        username: string;
+        email: string;
+    };
     totalAmount: number;
     status: OrderStatus;
     paymentMethod: string;

@@ -1,8 +1,10 @@
-import { Component } from '@angular/core';
+import { Component } from "@angular/core";
+
 import { FormsModule } from '@angular/forms';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, ActivatedRoute } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { AuthService, LoginRequest } from '../../service/auth/auth.service';
+import { CartService } from '../../service/cart/cart.service';
 import { ToastService } from '../../services/toast.service';
 
 @Component({
@@ -13,28 +15,34 @@ import { ToastService } from '../../services/toast.service';
 })
 export class Login {
   loginData: LoginRequest = {
-    username: '',
+    email: '',
     password: ''
   };
 
   isLoading = false;
   isFormValid = false;
+  returnUrl: string = '/home';
 
   constructor(
     private authService: AuthService,
+    private cartService: CartService,
     private router: Router,
+    private route: ActivatedRoute,
     private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
-    // Redirect if already authenticated
+    this.route.queryParams.subscribe(params => {
+      this.returnUrl = params['returnUrl'] || '/home';
+    });
+
     if (this.authService.isAuthenticated) {
       this.redirectBasedOnRole();
     }
   }
 
   onInputChange(): void {
-    this.isFormValid = this.loginData.username.trim().length > 0 && 
+    this.isFormValid = this.loginData.email.trim().length > 0 && 
                       this.loginData.password.trim().length > 0;
   }
 
@@ -51,14 +59,24 @@ export class Login {
         this.isLoading = false;
         this.toastService.success('Login successful!');
         
-        // Handle login response and redirect based on role
-        this.authService.handleLoginResponse(response);
+        // Merge guest cart with server cart after successful login
+        this.cartService.mergeGuestCart().subscribe({
+          next: (cart) => {
+            console.log('Guest cart merged successfully');
+            this.toastService.success('Your cart items have been saved!');
+          },
+          error: (error) => {
+            console.error('Error merging guest cart:', error);
+            // Don't fail login if cart merge fails
+          },
+          complete: () => {
+            this.handleSuccessfulLogin();
+          }
+        });
       },
       error: (error) => {
         this.isLoading = false;
         console.error('Login error:', error);
-        
-        // Show appropriate error message
         const errorMessage = error.error?.message || 'Login failed. Please check your credentials.';
         this.toastService.error(errorMessage);
       }
@@ -71,9 +89,17 @@ export class Login {
     }
   }
 
+  private handleSuccessfulLogin(): void {
+    if (this.returnUrl && this.returnUrl !== '/home' && !this.authService.isAdmin) {
+      this.router.navigate([this.returnUrl]);
+    } else {
+      this.redirectBasedOnRole();
+    }
+  }
+
   private redirectBasedOnRole(): void {
     if (this.authService.isAdmin) {
-      this.router.navigate(['/admin/dashboard']);
+      this.router.navigate(['/admin']);
     } else {
       this.router.navigate(['/home']);
     }

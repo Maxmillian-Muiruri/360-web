@@ -1,19 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
-
-interface Product {
-  id: string;
-  name: string;
-  description: string;
-  price: number;
-  category: string;
-  bankName: string;
-  balance: number;
-  country: string;
-  verification: string;
-}
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
 
 @Component({
   selector: 'app-usa-banks',
@@ -22,79 +12,100 @@ interface Product {
   templateUrl: './usa-banks.html',
   styleUrl: './usa-banks.css'
 })
-export class UsaBanks {
-  products: Product[] = [
-    {
-      id: 'usabank-001',
-      name: 'Chase Bank Account',
-      description: 'Premium Chase bank account with high balance and full access',
-      price: 2500,
-      category: 'USA Banks',
-      bankName: 'Chase Bank',
-      balance: 45000,
-      country: 'USA',
-      verification: 'Full Access'
-    },
-    {
-      id: 'usabank-002',
-      name: 'Bank of America Account',
-      description: 'Complete Bank of America account with online banking access',
-      price: 1800,
-      category: 'USA Banks',
-      bankName: 'Bank of America',
-      balance: 32000,
-      country: 'USA',
-      verification: 'Online Access'
-    },
-    {
-      id: 'usabank-003',
-      name: 'Wells Fargo Account',
-      description: 'Wells Fargo checking account with mobile app access',
-      price: 2200,
-      category: 'USA Banks',
-      bankName: 'Wells Fargo',
-      balance: 38000,
-      country: 'USA',
-      verification: 'Mobile Access'
-    },
-    {
-      id: 'usabank-004',
-      name: 'Citibank Account',
-      description: 'Citibank premium account with international transfer capability',
-      price: 3000,
-      category: 'USA Banks',
-      bankName: 'Citibank',
-      balance: 55000,
-      country: 'USA',
-      verification: 'International'
-    },
-    {
-      id: 'usabank-005',
-      name: 'US Bank Account',
-      description: 'US Bank checking account with ATM card access',
-      price: 1600,
-      category: 'USA Banks',
-      bankName: 'US Bank',
-      balance: 28000,
-      country: 'USA',
-      verification: 'ATM Access'
-    },
-    {
-      id: 'usabank-006',
-      name: 'PNC Bank Account',
-      description: 'PNC Bank account with online and mobile banking',
-      price: 1900,
-      category: 'USA Banks',
-      bankName: 'PNC Bank',
-      balance: 35000,
-      country: 'USA',
-      verification: 'Full Access'
+export class UsaBanks implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    // Load products from USA Banks category
+    const filters = { 
+      categoryId: 'usa-banks', // This should match the category ID in your backend
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded USA Banks products from backend:', response.products);
+        console.log('Total products:', response.total);
+      },
+      error: (error) => {
+        console.error('Error loading USA Banks products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  // View product details - navigate to product page
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
+    // Navigate to product details page with product ID
+    this.router.navigate(['/product', product.id]);
+  }
+
+  // Pagination methods
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
     }
-  ];
+  }
 
-  constructor(private router: Router) {}
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
 
-  viewProduct(productId: string): void {
-    this.router.navigate(['/product', productId]);
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+  getProductImage(product: Product): string {
+    return product.image || 'https://via.placeholder.com/300x200/cccccc/666666?text=No+Image';
+  }
+
+  getProductPrice(product: Product): string {
+    return `$${product.price.toFixed(2)}`;
+  }
+
+  isInStock(product: Product): boolean {
+    return product.stockQuantity > 0;
+  }
+
+  getStockStatus(product: Product): string {
+    if (product.stockQuantity > 10) return 'In Stock';
+    if (product.stockQuantity > 0) return `Only ${product.stockQuantity} left`;
+    return 'Out of Stock';
+  }
+
+  getStockStatusClass(product: Product): string {
+    if (product.stockQuantity > 10) return 'text-green-600';
+    if (product.stockQuantity > 0) return 'text-yellow-600';
+    return 'text-red-600';
   }
 }

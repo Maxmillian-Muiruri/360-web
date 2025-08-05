@@ -9,7 +9,7 @@ import { CartItemResponseDto } from './dto/cart-item-response.dto';
 export class CartService {
   constructor(private readonly prisma: PrismaService) {}
 
-  async addToCart(userId: string, addToCartDto: AddToCartDto): Promise<CartItemResponseDto> {
+  async addToCart(userId: string, addToCartDto: AddToCartDto): Promise<CartResponseDto> {
     const { productId, quantity } = addToCartDto;
 
     // Check if product exists
@@ -36,30 +36,29 @@ export class CartService {
 
     if (existingCartItem) {
       // Update quantity
-      const updatedCartItem = await this.prisma.cart.update({
+      await this.prisma.cart.update({
         where: { id: existingCartItem.id },
         data: { quantity: existingCartItem.quantity + quantity },
         include: {
           product: true,
         },
       });
-
-      return this.mapToCartItemResponse(updatedCartItem);
+    } else {
+      // Create new cart item
+      await this.prisma.cart.create({
+        data: {
+          userId,
+          productId,
+          quantity,
+        },
+        include: {
+          product: true,
+        },
+      });
     }
 
-    // Create new cart item
-    const newCartItem = await this.prisma.cart.create({
-      data: {
-        userId,
-        productId,
-        quantity,
-      },
-      include: {
-        product: true,
-      },
-    });
-
-    return this.mapToCartItemResponse(newCartItem);
+    // Return the full cart
+    return this.getCart(userId);
   }
 
   async getCart(userId: string): Promise<CartResponseDto> {
@@ -71,19 +70,30 @@ export class CartService {
       orderBy: { createdAt: 'desc' },
     });
 
-    const items = cartItems.map(item => this.mapToCartItemResponse(item));
-    const totalItems = items.reduce((sum, item) => sum + item.quantity, 0);
-    const totalPrice = items.reduce((sum, item) => sum + item.totalPrice, 0);
+    const items = cartItems.map(item => ({
+      id: item.id,
+      productId: item.productId,
+      name: item.product.name,
+      price: item.product.price,
+      quantity: item.quantity,
+      image: item.product.images && item.product.images.length > 0 ? item.product.images[0] : undefined,
+      stockQuantity: item.product.stockQuantity || 0
+    }));
+
+    const total = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
     return {
-      items,
-      totalItems,
-      totalPrice,
+      id: userId, // Use userId as cart id for now
+      userId: userId,
+      items: items,
+      total: total,
       itemCount: items.length,
+      createdAt: new Date(),
+      updatedAt: new Date()
     };
   }
 
-  async updateCartItem(userId: string, cartItemId: string, updateCartDto: UpdateCartDto): Promise<CartItemResponseDto> {
+  async updateCartItem(userId: string, cartItemId: string, updateCartDto: UpdateCartDto): Promise<CartResponseDto> {
     const { quantity } = updateCartDto;
 
     const cartItem = await this.prisma.cart.findFirst({
@@ -108,10 +118,11 @@ export class CartService {
       },
     });
 
-    return this.mapToCartItemResponse(updatedCartItem);
+    // Return the full cart after update
+    return this.getCart(userId);
   }
 
-  async removeFromCart(userId: string, cartItemId: string): Promise<void> {
+  async removeFromCart(userId: string, cartItemId: string): Promise<CartResponseDto> {
     const cartItem = await this.prisma.cart.findFirst({
       where: {
         id: cartItemId,
@@ -126,12 +137,26 @@ export class CartService {
     await this.prisma.cart.delete({
       where: { id: cartItemId },
     });
+
+    // Return the full cart after removal
+    return this.getCart(userId);
   }
 
-  async clearCart(userId: string): Promise<void> {
+  async clearCart(userId: string): Promise<CartResponseDto> {
     await this.prisma.cart.deleteMany({
       where: { userId },
     });
+
+    // Return empty cart
+    return {
+      id: userId,
+      userId: userId,
+      items: [],
+      total: 0,
+      itemCount: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
   }
 
   async getCartItemCount(userId: string): Promise<number> {
@@ -143,19 +168,5 @@ export class CartService {
     });
 
     return result._sum.quantity || 0;
-  }
-
-  private mapToCartItemResponse(cartItem: any): CartItemResponseDto {
-    return {
-      id: cartItem.id,
-      productId: cartItem.productId,
-      productName: cartItem.product.name,
-      productPrice: cartItem.product.price,
-      productImage: cartItem.product.image || undefined,
-      quantity: cartItem.quantity,
-      totalPrice: cartItem.product.price * cartItem.quantity,
-      createdAt: cartItem.createdAt,
-      updatedAt: cartItem.updatedAt,
-    };
   }
 } 

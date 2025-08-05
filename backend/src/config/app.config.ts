@@ -11,4 +11,9 @@ export default registerAs('app', () => ({
   bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
   uploadMaxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '10485760', 10), // 10MB
   uploadPath: process.env.UPLOAD_PATH || 'uploads',
+  cloudinary: {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+    apiKey: process.env.CLOUDINARY_API_KEY,
+    apiSecret: process.env.CLOUDINARY_API_SECRET,
+  },
 })); 

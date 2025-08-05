@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-paypal-log',
@@ -9,89 +12,76 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './paypal-log.html',
   styleUrl: './paypal-log.css'
 })
-export class PaypalLog {
-  // PayPal Log products data
-  products = [
-    {
-      id: 'PP001',
-      name: 'PayPal Business Account - $2,500 Balance',
-      category: 'PAYPAL LOG',
-      price: 300.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL',
-      alt: 'PayPal Business Account',
-      accountType: 'Business',
-      balance: '$2,500',
-      status: 'Verified',
-      features: ['Instant Withdrawals', 'High Limits', 'API Access']
-    },
-    {
-      id: 'PP002',
-      name: 'PayPal Personal Account - $1,800 Balance',
-      category: 'PAYPAL LOG',
-      price: 220.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+PERSONAL',
-      alt: 'PayPal Personal Account',
-      accountType: 'Personal',
-      balance: '$1,800',
-      status: 'Verified',
-      features: ['Instant Transfers', 'Mobile App', 'Email Access']
-    },
-    {
-      id: 'PP003',
-      name: 'PayPal Premier Account - $3,200 Balance',
-      category: 'PAYPAL LOG',
-      price: 380.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+PREMIER',
-      alt: 'PayPal Premier Account',
-      accountType: 'Premier',
-      balance: '$3,200',
-      status: 'Verified',
-      features: ['Business Features', 'High Volume', 'Advanced Security']
-    },
-    {
-      id: 'PP004',
-      name: 'PayPal UK Account - £2,000 Balance',
-      category: 'PAYPAL LOG',
-      price: 280.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+UK',
-      alt: 'PayPal UK Account',
-      accountType: 'UK Business',
-      balance: '£2,000',
-      status: 'Verified',
-      features: ['UK Banking', 'SEPA Transfers', 'Multi-Currency']
-    },
-    {
-      id: 'PP005',
-      name: 'PayPal EU Account - €1,500 Balance',
-      category: 'PAYPAL LOG',
-      price: 200.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+EU',
-      alt: 'PayPal EU Account',
-      accountType: 'EU Personal',
-      balance: '€1,500',
-      status: 'Verified',
-      features: ['SEPA Support', 'EU Compliance', 'Instant Transfers']
-    },
-    {
-      id: 'PP006',
-      name: 'PayPal Canada Account - $1,200 CAD Balance',
-      category: 'PAYPAL LOG',
-      price: 160.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+CANADA',
-      alt: 'PayPal Canada Account',
-      accountType: 'Canada Personal',
-      balance: '$1,200 CAD',
-      status: 'Verified',
-      features: ['Canadian Banking', 'Interac Support', 'Mobile App']
-    }
-  ];
+export class PaypalLog implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {}
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing PayPal log:', product);
-    // Navigate to product details page with product ID
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'paypal-log',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded paypal log products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading paypal log products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
   }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+
 }

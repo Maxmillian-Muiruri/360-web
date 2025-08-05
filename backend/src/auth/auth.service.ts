@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  ConflictException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
@@ -14,17 +18,14 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async validateUser(username: string, password: string): Promise<any> {
+  async validateUser(email: string, password: string): Promise<any> {
     const user = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { username },
-          { email: username },
-        ],
+        email: email,
       },
     });
 
-    if (user && await bcrypt.compare(password, user.password)) {
+    if (user && (await bcrypt.compare(password, user.password))) {
       const { password, ...result } = user;
       return result;
     }
@@ -32,8 +33,8 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const user = await this.validateUser(loginDto.username, loginDto.password);
-    
+    const user = await this.validateUser(loginDto.email, loginDto.password);
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -49,7 +50,7 @@ export class AuthService {
     });
 
     const payload = { username: user.username, sub: user.id, role: user.role };
-    
+
     return {
       user: {
         id: user.id,
@@ -71,10 +72,7 @@ export class AuthService {
     // Check if user already exists
     const existingUser = await this.prisma.user.findFirst({
       where: {
-        OR: [
-          { username: registerDto.username },
-          { email: registerDto.email },
-        ],
+        OR: [{ username: registerDto.username }, { email: registerDto.email }],
       },
     });
 
@@ -83,8 +81,12 @@ export class AuthService {
     }
 
     // Hash password
-    const bcryptRounds = this.configService.get<number>('app.bcryptRounds') || 12;
-    const hashedPassword = await bcrypt.hash(registerDto.password, bcryptRounds);
+    const bcryptRounds =
+      this.configService.get<number>('app.bcryptRounds') || 12;
+    const hashedPassword = await bcrypt.hash(
+      registerDto.password,
+      bcryptRounds,
+    );
 
     // Create user
     const user = await this.prisma.user.create({
@@ -114,15 +116,13 @@ export class AuthService {
     }
 
     const payload = { username: user.username, sub: user.id, role: user.role };
-    
+
     return {
       access_token: this.jwtService.sign(payload),
     };
   }
 
   async logout(userId: string) {
-    // In a more complex implementation, you might want to blacklist the token
-    // For now, we'll just return a success message
     return { message: 'Logged out successfully' };
   }
-} 
+}

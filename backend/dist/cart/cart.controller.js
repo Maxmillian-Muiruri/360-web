@@ -19,7 +19,6 @@ const cart_service_1 = require("./cart.service");
 const add_to_cart_dto_1 = require("./dto/add-to-cart.dto");
 const update_cart_dto_1 = require("./dto/update-cart.dto");
 const cart_response_dto_1 = require("./dto/cart-response.dto");
-const cart_item_response_dto_1 = require("./dto/cart-item-response.dto");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
 let CartController = class CartController {
     cartService;
@@ -27,7 +26,8 @@ let CartController = class CartController {
         this.cartService = cartService;
     }
     async addToCart(req, addToCartDto) {
-        return this.cartService.addToCart(req.user.id, addToCartDto);
+        await this.cartService.addToCart(req.user.id, addToCartDto);
+        return this.cartService.getCart(req.user.id);
     }
     async getCart(req) {
         return this.cartService.getCart(req.user.id);
@@ -50,7 +50,7 @@ exports.CartController = CartController;
 __decorate([
     (0, common_1.Post)('add'),
     (0, swagger_1.ApiOperation)({ summary: 'Add item to cart' }),
-    (0, swagger_1.ApiResponse)({ status: 201, description: 'Item added to cart successfully', type: cart_item_response_dto_1.CartItemResponseDto }),
+    (0, swagger_1.ApiResponse)({ status: 201, description: 'Item added to cart successfully', type: cart_response_dto_1.CartResponseDto }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Product not found' }),
     __param(0, (0, common_1.Request)()),
@@ -72,7 +72,7 @@ __decorate([
 __decorate([
     (0, common_1.Patch)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Update cart item quantity' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Cart item updated successfully', type: cart_item_response_dto_1.CartItemResponseDto }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Cart item updated successfully', type: cart_response_dto_1.CartResponseDto }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Cart item not found' }),
     __param(0, (0, common_1.Request)()),
@@ -85,7 +85,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(':id'),
     (0, swagger_1.ApiOperation)({ summary: 'Remove item from cart' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Item removed from cart successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Item removed from cart successfully', type: cart_response_dto_1.CartResponseDto }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
     (0, swagger_1.ApiResponse)({ status: 404, description: 'Cart item not found' }),
     __param(0, (0, common_1.Request)()),
@@ -97,7 +97,7 @@ __decorate([
 __decorate([
     (0, common_1.Delete)(),
     (0, swagger_1.ApiOperation)({ summary: 'Clear entire cart' }),
-    (0, swagger_1.ApiResponse)({ status: 200, description: 'Cart cleared successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Cart cleared successfully', type: cart_response_dto_1.CartResponseDto }),
     (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
     __param(0, (0, common_1.Request)()),
     __metadata("design:type", Function),
@@ -116,7 +116,7 @@ __decorate([
 ], CartController.prototype, "getCartItemCount", null);
 exports.CartController = CartController = __decorate([
     (0, swagger_1.ApiTags)('cart'),
-    (0, common_1.Controller)('api/cart'),
+    (0, common_1.Controller)('cart'),
     (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard),
     (0, swagger_1.ApiBearerAuth)(),
     __metadata("design:paramtypes", [cart_service_1.CartService])

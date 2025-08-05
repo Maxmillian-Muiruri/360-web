@@ -17,8 +17,8 @@ export declare class AuthController {
         refresh_token: string;
     }>;
     register(registerDto: RegisterDto): Promise<{
-        username: string;
         email: string | null;
+        username: string;
         role: import(".prisma/client").$Enums.UserRole;
         firstName: string | null;
         lastName: string | null;

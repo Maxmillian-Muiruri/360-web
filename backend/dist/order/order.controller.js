@@ -47,6 +47,9 @@ let OrderController = class OrderController {
     async updatePaymentStatus(id, body) {
         return this.orderService.updatePaymentStatus(id, body.paymentStatus);
     }
+    async deleteOrder(id) {
+        return this.orderService.deleteOrder(id);
+    }
 };
 exports.OrderController = OrderController;
 __decorate([
@@ -138,9 +141,23 @@ __decorate([
     __metadata("design:paramtypes", [String, Object]),
     __metadata("design:returntype", Promise)
 ], OrderController.prototype, "updatePaymentStatus", null);
+__decorate([
+    (0, common_1.Delete)(':id'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    (0, swagger_1.ApiBearerAuth)(),
+    (0, swagger_1.ApiOperation)({ summary: 'Delete an order (Admin only)' }),
+    (0, swagger_1.ApiResponse)({ status: 200, description: 'Order deleted successfully' }),
+    (0, swagger_1.ApiResponse)({ status: 401, description: 'Unauthorized' }),
+    (0, swagger_1.ApiResponse)({ status: 403, description: 'Admin access required' }),
+    (0, swagger_1.ApiResponse)({ status: 404, description: 'Order not found' }),
+    __param(0, (0, common_1.Param)('id')),
+    __metadata("design:type", Function),
+    __metadata("design:paramtypes", [String]),
+    __metadata("design:returntype", Promise)
+], OrderController.prototype, "deleteOrder", null);
 exports.OrderController = OrderController = __decorate([
     (0, swagger_1.ApiTags)('orders'),
-    (0, common_1.Controller)('api/orders'),
+    (0, common_1.Controller)('orders'),
     __metadata("design:paramtypes", [order_service_1.OrderService])
 ], OrderController);
 //# sourceMappingURL=order.controller.js.map

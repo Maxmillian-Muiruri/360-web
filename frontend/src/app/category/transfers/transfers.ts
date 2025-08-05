@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-transfers',
@@ -9,89 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './transfers.html',
   styleUrl: './transfers.css'
 })
-export class Transfers {
-  // Transfers products data
-  products = [
-    {
-      id: 'ZELLE001',
-      name: '$1000 Zelle Transfer - USA',
-      category: 'TRANSFERS',
-      price: 150.00,
-      image: 'https://via.placeholder.com/300x200/0066cc/ffffff?text=ZELLE',
-      alt: 'Zelle Transfer',
-      amount: '$1,000',
-      service: 'Zelle',
-      country: 'USA',
-      speed: 'Instant'
-    },
-    {
-      id: 'PAYTM001',
-      name: '74,000 INR PayTM Transfer',
-      category: 'TRANSFERS',
-      price: 285.00,
-      image: 'https://via.placeholder.com/300x200/ff6600/ffffff?text=PAYTM',
-      alt: 'PayTM Transfer',
-      amount: '74,000 INR',
-      service: 'PayTM',
-      country: 'India',
-      speed: 'Instant'
-    },
-    {
-      id: 'CASHAPP001',
-      name: '$500 CashApp Transfer',
-      category: 'TRANSFERS',
-      price: 75.00,
-      image: 'https://via.placeholder.com/300x200/00d632/ffffff?text=CASHAPP',
-      alt: 'CashApp Transfer',
-      amount: '$500',
-      service: 'CashApp',
-      country: 'USA',
-      speed: 'Instant'
-    },
-    {
-      id: 'PAYPAL001',
-      name: '€800 PayPal Transfer - Europe',
-      category: 'TRANSFERS',
-      price: 120.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL',
-      alt: 'PayPal Transfer',
-      amount: '€800',
-      service: 'PayPal',
-      country: 'Europe',
-      speed: '1-2 hours'
-    },
-    {
-      id: 'VENMO001',
-      name: '$750 Venmo Transfer',
-      category: 'TRANSFERS',
-      price: 95.00,
-      image: 'https://via.placeholder.com/300x200/008cff/ffffff?text=VENMO',
-      alt: 'Venmo Transfer',
-      amount: '$750',
-      service: 'Venmo',
-      country: 'USA',
-      speed: 'Instant'
-    },
-    {
-      id: 'APPLEPAY001',
-      name: '$1200 Apple Pay Transfer',
-      category: 'TRANSFERS',
-      price: 180.00,
-      image: 'https://via.placeholder.com/300x200/000000/ffffff?text=APPLE+PAY',
-      alt: 'Apple Pay Transfer',
-      amount: '$1,200',
-      service: 'Apple Pay',
-      country: 'USA',
-      speed: 'Instant'
-    }
-  ];
+export class Transfers implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing transfer:', product);
-    // Navigate to product details page with product ID
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'transfers',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded transfers products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading transfers products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

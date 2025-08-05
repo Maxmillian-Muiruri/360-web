@@ -32,6 +32,13 @@ export class OrderResponseDto {
   userId: string;
 
   @ApiProperty()
+  user?: {
+    id: string;
+    username: string;
+    email: string;
+  };
+
+  @ApiProperty()
   totalAmount: number;
 
   @ApiProperty({ enum: OrderStatus })

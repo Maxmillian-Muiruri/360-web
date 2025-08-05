@@ -65,15 +65,17 @@
                     >{{ product.delivery }}</span
                   >
                   <img
-                    [src]="product.image"
-                    [alt]="product.alt"
+                    [src]="ProductUtils.getProductImage(product)"
+                    [alt]="ProductUtils.getProductAltText(product)"
                     class="w-full h-36 object-contain mb-3 cursor-pointer"
                     (click)="viewProduct(product)"
                   />
                 </div>
                 <div class="bg-gray-50 p-4 rounded">
                   <div class="text-sm mb-1">
-                    <small class="text-gray-600">{{ product.category }}</small>
+                    <small class="text-gray-600"
+                      >{{ ProductUtils.getProductCategory(product) }}</small
+                    >
                   </div>
                   <h3
                     class="text-base font-medium text-gray-900 mb-2 cursor-pointer"
@@ -86,14 +88,14 @@
                   </div>
                   <div class="text-xs text-gray-500 mb-2">
                     <span
-                      *ngFor="let feature of product.features; let last = last"
+                      *ngFor="let feature of ProductUtils.getProductFeatures(product); let last = last"
                     >
                       {{ feature }}{{ !last ? ' • ' : '' }}
                     </span>
                   </div>
                   <div class="flex justify-center items-center">
                     <span class="text-gray-900 font-bold"
-                      >${{ product.price.toFixed(2) }}</span
+                      >{{ ProductUtils.getProductPrice(product) }}</span
                     >
                   </div>
                 </div>

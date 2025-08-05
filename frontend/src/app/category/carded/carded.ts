@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-carded',
@@ -9,83 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './carded.html',
   styleUrl: './carded.css'
 })
-export class Carded {
-  // Carded products data
-  products = [
-    {
-      id: 'CARDED001',
-      name: 'Carded Service - Premium',
-      category: 'CARDED',
-      price: 300.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+PREMIUM',
-      alt: 'Carded Premium Service',
-      serviceType: 'Premium',
-      successRate: '95%',
-      features: ['High Success Rate', 'Premium Support', 'Fast Processing']
-    },
-    {
-      id: 'CARDED002',
-      name: 'Carded Service - Standard',
-      category: 'CARDED',
-      price: 200.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+STANDARD',
-      alt: 'Carded Standard Service',
-      serviceType: 'Standard',
-      successRate: '85%',
-      features: ['Reliable Service', 'Good Support', 'Standard Processing']
-    },
-    {
-      id: 'CARDED003',
-      name: 'Carded Service - Advanced',
-      category: 'CARDED',
-      price: 400.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+ADVANCED',
-      alt: 'Carded Advanced Service',
-      serviceType: 'Advanced',
-      successRate: '98%',
-      features: ['Advanced Methods', 'Priority Support', 'Expert Processing']
-    },
-    {
-      id: 'CARDED004',
-      name: 'Carded Service - Professional',
-      category: 'CARDED',
-      price: 500.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+PROFESSIONAL',
-      alt: 'Carded Professional Service',
-      serviceType: 'Professional',
-      successRate: '99%',
-      features: ['Professional Grade', 'Dedicated Support', 'Maximum Success']
-    },
-    {
-      id: 'CARDED005',
-      name: 'Carded Service - Basic',
-      category: 'CARDED',
-      price: 150.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+BASIC',
-      alt: 'Carded Basic Service',
-      serviceType: 'Basic',
-      successRate: '75%',
-      features: ['Basic Service', 'Standard Support', 'Entry Level']
-    },
-    {
-      id: 'CARDED006',
-      name: 'Carded Service - Enterprise',
-      category: 'CARDED',
-      price: 600.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDED+ENTERPRISE',
-      alt: 'Carded Enterprise Service',
-      serviceType: 'Enterprise',
-      successRate: '99.5%',
-      features: ['Enterprise Level', '24/7 Support', 'Maximum Security']
-    }
-  ];
+export class Carded implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing carded service:', product);
-    // Navigate to product details page with product ID
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categorySlug: 'carded',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded carded products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading carded products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

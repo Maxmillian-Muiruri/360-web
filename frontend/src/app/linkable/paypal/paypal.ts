@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-paypal',
@@ -9,79 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './paypal.html',
   styleUrl: './paypal.css'
 })
-export class Paypal {
-  products = [
-    {
-      id: 'PAY001',
-      name: 'USA - LINKABLE [DEBIT] | $1500+ USD BAL',
-      category: 'LINKABLES',
-      price: 200.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+DEBIT',
-      alt: 'PayPal Debit Linkable',
-      balance: '$1500+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'PAY002',
-      name: 'USA - LINKABLE [DEBIT] | $2500+ USD BAL',
-      category: 'LINKABLES',
-      price: 300.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+DEBIT',
-      alt: 'PayPal Debit Linkable',
-      balance: '$2500+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'PAY003',
-      name: 'USA - LINKABLE [CREDIT] | $3000+ USD BAL',
-      category: 'LINKABLES',
-      price: 400.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+CREDIT',
-      alt: 'PayPal Credit Linkable',
-      balance: '$3000+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    },
-    {
-      id: 'PAY004',
-      name: 'UK - LINKABLE [DEBIT] | £2000+ GBP BAL',
-      category: 'LINKABLES',
-      price: 250.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+UK',
-      alt: 'PayPal UK Linkable',
-      balance: '£2000+ GBP',
-      cardType: 'DEBIT',
-      country: 'UK'
-    },
-    {
-      id: 'PAY005',
-      name: 'UK - LINKABLE [CREDIT] | £3500+ GBP BAL',
-      category: 'LINKABLES',
-      price: 450.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+UK+CREDIT',
-      alt: 'PayPal UK Credit Linkable',
-      balance: '£3500+ GBP',
-      cardType: 'CREDIT',
-      country: 'UK'
-    },
-    {
-      id: 'PAY006',
-      name: 'USA - LINKABLE [DEBIT] | $1000+ USD BAL',
-      category: 'LINKABLES',
-      price: 150.00,
-      image: 'https://via.placeholder.com/300x200/003087/ffffff?text=PAYPAL+BASIC',
-      alt: 'PayPal Basic Linkable',
-      balance: '$1000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    }
-  ];
+export class LinkablePaypal implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'paypal-linkables',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded paypal linkables products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading paypal linkables products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

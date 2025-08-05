@@ -9,6 +9,11 @@ declare const _default: (() => {
     bcryptRounds: number;
     uploadMaxSize: number;
     uploadPath: string;
+    cloudinary: {
+        cloudName: string | undefined;
+        apiKey: string | undefined;
+        apiSecret: string | undefined;
+    };
 }) & import("@nestjs/config").ConfigFactoryKeyHost<{
     port: number;
     nodeEnv: string;
@@ -20,5 +25,10 @@ declare const _default: (() => {
     bcryptRounds: number;
     uploadMaxSize: number;
     uploadPath: string;
+    cloudinary: {
+        cloudName: string | undefined;
+        apiKey: string | undefined;
+        apiSecret: string | undefined;
+    };
 }>;
 export default _default;

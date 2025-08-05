@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-tools',
@@ -9,89 +12,76 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './tools.html',
   styleUrl: './tools.css'
 })
-export class Tools {
-  // Tools products data
-  products = [
-    {
-      id: 'KYC001',
-      name: 'KYC VERIFICATION SOFTWARE - 2FA BYPASS 2023',
-      category: 'TOOLS',
-      price: 350.00,
-      image: 'https://via.placeholder.com/300x200/1a1a1a/ffffff?text=KYC+SOFTWARE',
-      alt: 'KYC Verification Software',
-      type: 'KYC Bypass',
-      version: '2023',
-      features: ['2FA Bypass', 'ID Verification', 'Real-time Processing'],
-      delivery: 'Instant Download'
-    },
-    {
-      id: 'CARDING001',
-      name: 'Advanced Carding Software Suite',
-      category: 'TOOLS',
-      price: 280.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDING+SUITE',
-      alt: 'Carding Software Suite',
-      type: 'Carding Tools',
-      version: 'Pro',
-      features: ['Card Checker', 'BIN Lookup', 'CVV Generator'],
-      delivery: 'Instant Download'
-    },
-    {
-      id: 'SPOOFING001',
-      name: 'Caller ID Spoofing Tool - Premium',
-      category: 'TOOLS',
-      price: 150.00,
-      image: 'https://via.placeholder.com/300x200/0066cc/ffffff?text=SPOOFING+TOOL',
-      alt: 'Caller ID Spoofing Tool',
-      type: 'Spoofing',
-      version: 'Premium',
-      features: ['Caller ID Spoof', 'SMS Spoof', 'Voice Cloning'],
-      delivery: 'Instant Download'
-    },
-    {
-      id: 'TRACKING001',
-      name: 'Advanced GPS Tracking Software',
-      category: 'TOOLS',
-      price: 200.00,
-      image: 'https://via.placeholder.com/300x200/00cc00/ffffff?text=GPS+TRACKING',
-      alt: 'GPS Tracking Software',
-      type: 'Tracking',
-      version: 'Advanced',
-      features: ['Real-time GPS', 'Location History', 'Geofencing'],
-      delivery: 'Instant Download'
-    },
-    {
-      id: 'HACKING001',
-      name: 'Penetration Testing Toolkit',
-      category: 'TOOLS',
-      price: 400.00,
-      image: 'https://via.placeholder.com/300x200/ff6600/ffffff?text=PENETRATION+TOOLKIT',
-      alt: 'Penetration Testing Toolkit',
-      type: 'Security Testing',
-      version: 'Professional',
-      features: ['Vulnerability Scanner', 'Exploit Framework', 'Report Generator'],
-      delivery: 'Instant Download'
-    },
-    {
-      id: 'CRYPTO001',
-      name: 'Cryptocurrency Mining Software',
-      category: 'TOOLS',
-      price: 180.00,
-      image: 'https://via.placeholder.com/300x200/ffcc00/ffffff?text=CRYPTO+MINING',
-      alt: 'Cryptocurrency Mining Software',
-      type: 'Mining',
-      version: 'Optimized',
-      features: ['Multi-Algorithm', 'GPU Optimization', 'Profit Calculator'],
-      delivery: 'Instant Download'
-    }
-  ];
+export class Tools implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
 
-  constructor(private router: Router) {}
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing tool:', product);
-    // Navigate to product details page with product ID
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'tools',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded tools products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading tools products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
   }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+
 }

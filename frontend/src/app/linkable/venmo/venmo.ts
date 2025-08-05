@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-venmo',
@@ -9,68 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './venmo.html',
   styleUrl: './venmo.css'
 })
-export class Venmo {
-  products = [
-    {
-      id: 'VEN001',
-      name: 'USA - LINKABLE [DEBIT] | $1200+ USD BAL',
-      category: 'LINKABLES',
-      price: 180.00,
-      image: 'https://via.placeholder.com/300x200/008CFF/ffffff?text=VENMO+DEBIT',
-      alt: 'Venmo Debit Linkable',
-      balance: '$1200+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'VEN002',
-      name: 'USA - LINKABLE [DEBIT] | $2000+ USD BAL',
-      category: 'LINKABLES',
-      price: 250.00,
-      image: 'https://via.placeholder.com/300x200/008CFF/ffffff?text=VENMO+DEBIT',
-      alt: 'Venmo Debit Linkable',
-      balance: '$2000+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'VEN003',
-      name: 'USA - LINKABLE [CREDIT] | $2500+ USD BAL',
-      category: 'LINKABLES',
-      price: 320.00,
-      image: 'https://via.placeholder.com/300x200/008CFF/ffffff?text=VENMO+CREDIT',
-      alt: 'Venmo Credit Linkable',
-      balance: '$2500+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    },
-    {
-      id: 'VEN004',
-      name: 'USA - LINKABLE [DEBIT] | $800+ USD BAL',
-      category: 'LINKABLES',
-      price: 120.00,
-      image: 'https://via.placeholder.com/300x200/008CFF/ffffff?text=VENMO+BASIC',
-      alt: 'Venmo Basic Linkable',
-      balance: '$800+ USD',
-      cardType: 'DEBIT',
-      country: 'USA'
-    },
-    {
-      id: 'VEN005',
-      name: 'USA - LINKABLE [CREDIT] | $4000+ USD BAL',
-      category: 'LINKABLES',
-      price: 480.00,
-      image: 'https://via.placeholder.com/300x200/008CFF/ffffff?text=VENMO+PREMIUM',
-      alt: 'Venmo Premium Linkable',
-      balance: '$4000+ USD',
-      cardType: 'CREDIT',
-      country: 'USA'
-    }
-  ];
+export class LinkableVenmo implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  viewProduct(product: any) {
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categoryId: 'venmo-linkables',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded venmo linkables products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading venmo linkables products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

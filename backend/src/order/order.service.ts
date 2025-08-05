@@ -226,11 +226,42 @@ export class OrderService {
     };
   }
 
+  async deleteOrder(id: string): Promise<{ message: string }> {
+    // Check if order exists
+    const order = await this.prisma.order.findUnique({
+      where: { id },
+      include: {
+        items: true,
+      },
+    });
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${id} not found`);
+    }
+
+    // Delete order items first (due to foreign key constraints)
+    await this.prisma.orderItem.deleteMany({
+      where: { orderId: id },
+    });
+
+    // Delete the order
+    await this.prisma.order.delete({
+      where: { id },
+    });
+
+    return { message: 'Order deleted successfully' };
+  }
+
   private mapToOrderResponse(order: any): OrderResponseDto {
     return {
       id: order.id,
       orderNumber: order.orderNumber,
       userId: order.userId,
+      user: order.user ? {
+        id: order.user.id,
+        username: order.user.username,
+        email: order.user.email,
+      } : undefined,
       totalAmount: order.totalAmount,
       status: order.status,
       paymentMethod: order.paymentMethod,

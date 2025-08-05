@@ -32,4 +32,7 @@ export declare class OrderController {
     updatePaymentStatus(id: string, body: {
         paymentStatus: PaymentStatus;
     }): Promise<OrderResponseDto>;
+    deleteOrder(id: string): Promise<{
+        message: string;
+    }>;
 }

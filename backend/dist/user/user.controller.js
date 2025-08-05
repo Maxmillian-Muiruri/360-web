@@ -117,7 +117,8 @@ __decorate([
 ], UserController.prototype, "createUser", null);
 __decorate([
     (0, common_1.Get)(),
-    (0, common_1.UseGuards)(admin_guard_1.AdminGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Get all users with filtering and pagination (Admin only)' }),
     (0, swagger_1.ApiResponse)({
         status: 200,
@@ -179,7 +180,8 @@ __decorate([
 ], UserController.prototype, "updateUser", null);
 __decorate([
     (0, common_1.Delete)(':id'),
-    (0, common_1.UseGuards)(admin_guard_1.AdminGuard),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, admin_guard_1.AdminGuard),
+    (0, swagger_1.ApiBearerAuth)(),
     (0, swagger_1.ApiOperation)({ summary: 'Delete user (Admin only)' }),
     (0, swagger_1.ApiResponse)({
         status: 200,

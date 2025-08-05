@@ -1,7 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../../shared/sidebar/sidebar';
+import { ProductService, Product } from '../../service/product/product.service';
+import { ToastService } from '../../services/toast.service';
+import { ProductUtils } from '../../shared/utils/product.utils';
 
 @Component({
   selector: 'app-clips',
@@ -9,89 +12,72 @@ import { SidebarComponent } from '../../shared/sidebar/sidebar';
   templateUrl: './clips.html',
   styleUrl: './clips.css'
 })
-export class Clips {
-  // Clips products data
-  products = [
-    {
-      id: 'CLIP001',
-      name: 'Cashout Tutorial - Complete Guide',
-      category: 'CLIPS',
-      price: 50.00,
-      image: 'https://via.placeholder.com/300x200/000000/ffffff?text=CASHOUT+TUTORIAL',
-      alt: 'Cashout Tutorial Video',
-      videoType: 'Tutorial',
-      duration: '45 min',
-      quality: 'HD',
-      features: ['Step-by-step Guide', 'HD Quality', 'Download Link']
-    },
-    {
-      id: 'CLIP002',
-      name: 'Carding Demonstration - Live Session',
-      category: 'CLIPS',
-      price: 75.00,
-      image: 'https://via.placeholder.com/300x200/cc0000/ffffff?text=CARDING+DEMO',
-      alt: 'Carding Demonstration',
-      videoType: 'Demonstration',
-      duration: '30 min',
-      quality: 'HD',
-      features: ['Live Demonstration', 'Real-time Process', 'Expert Commentary']
-    },
-    {
-      id: 'CLIP003',
-      name: 'Fraud Prevention Bypass - Advanced',
-      category: 'CLIPS',
-      price: 100.00,
-      image: 'https://via.placeholder.com/300x200/0066cc/ffffff?text=FRAUD+BYPASS',
-      alt: 'Fraud Prevention Bypass',
-      videoType: 'Advanced',
-      duration: '60 min',
-      quality: '4K',
-      features: ['Advanced Techniques', '4K Quality', 'Premium Content']
-    },
-    {
-      id: 'CLIP004',
-      name: 'Bank Transfer Guide - Step by Step',
-      category: 'CLIPS',
-      price: 40.00,
-      image: 'https://via.placeholder.com/300x200/00cc00/ffffff?text=BANK+TRANSFER',
-      alt: 'Bank Transfer Guide',
-      videoType: 'Guide',
-      duration: '25 min',
-      quality: 'HD',
-      features: ['Bank Transfer Methods', 'Multiple Banks', 'Success Tips']
-    },
-    {
-      id: 'CLIP005',
-      name: 'Cryptocurrency Cashout - Complete',
-      category: 'CLIPS',
-      price: 80.00,
-      image: 'https://via.placeholder.com/300x200/ff9900/ffffff?text=CRYPTO+CASHOUT',
-      alt: 'Cryptocurrency Cashout',
-      videoType: 'Specialized',
-      duration: '50 min',
-      quality: 'HD',
-      features: ['Crypto Methods', 'Multiple Coins', 'Security Tips']
-    },
-    {
-      id: 'CLIP006',
-      name: 'ATM Skimming Tutorial - Professional',
-      category: 'CLIPS',
-      price: 120.00,
-      image: 'https://via.placeholder.com/300x200/666666/ffffff?text=ATM+SKIMMING',
-      alt: 'ATM Skimming Tutorial',
-      videoType: 'Professional',
-      duration: '90 min',
-      quality: '4K',
-      features: ['Professional Grade', 'Equipment Guide', 'Safety Protocols']
-    }
-  ];
+export class Clips implements OnInit {
+  products: Product[] = [];
+  loading = false;
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  ProductUtils = ProductUtils;
 
-  constructor(private router: Router) {}
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private toastService: ToastService
+  ) {}
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
-    console.log('Viewing clip:', product);
-    // Navigate to product details page with product ID
+  ngOnInit() {
+    this.loadProducts();
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters = { 
+      categorySlug: 'spamming',
+      isActive: true 
+    };
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded clips products from backend:', response.products);
+      },
+      error: (error) => {
+        console.error('Error loading clips products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  viewProduct(product: Product) {
+    console.log('Viewing product:', product);
     this.router.navigate(['/product', product.id]);
+  }
+
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
   }
 }

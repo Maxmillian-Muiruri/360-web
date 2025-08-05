@@ -40,7 +40,7 @@
         <div
           *ngFor="let product of products"
           class="bg-white rounded-lg shadow-md overflow-hidden cursor-pointer hover:shadow-lg transition-shadow"
-          (click)="viewProduct(product.id)"
+          (click)="viewProduct(product)"
         >
           <!-- Product Image Section -->
           <div class="relative p-4">
@@ -76,7 +76,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Bank:</span>
-                <span class="font-medium">{{ product.bank }}</span>
+                <span class="font-medium">{{ "Chase" }}</span>
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">Country:</span>
@@ -84,7 +84,7 @@
               </div>
               <div class="flex justify-between text-sm">
                 <span class="text-gray-500">CVV:</span>
-                <span class="font-medium">{{ product.cvv }}</span>
+                <span class="font-medium">{{ "Yes" }}</span>
               </div>
             </div>
 

@@ -12,6 +12,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.RegisterDto = exports.UserRole = void 0;
 const class_validator_1 = require("class-validator");
 const swagger_1 = require("@nestjs/swagger");
+const match_decorator_1 = require("../decorators/match.decorator");
 var UserRole;
 (function (UserRole) {
     UserRole["USER"] = "USER";
@@ -22,6 +23,7 @@ class RegisterDto {
     username;
     email;
     password;
+    confirmPassword;
     role = UserRole.USER;
     firstName;
     lastName;
@@ -57,6 +59,16 @@ __decorate([
     (0, class_validator_1.MinLength)(6),
     __metadata("design:type", String)
 ], RegisterDto.prototype, "password", void 0);
+__decorate([
+    (0, swagger_1.ApiProperty)({
+        description: 'Confirm password',
+        example: 'password123',
+    }),
+    (0, class_validator_1.IsString)(),
+    (0, class_validator_1.IsNotEmpty)(),
+    (0, match_decorator_1.Match)('password', { message: 'Passwords do not match' }),
+    __metadata("design:type", String)
+], RegisterDto.prototype, "confirmPassword", void 0);
 __decorate([
     (0, swagger_1.ApiProperty)({
         description: 'User role',

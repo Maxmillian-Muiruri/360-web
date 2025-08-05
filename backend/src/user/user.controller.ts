@@ -90,7 +90,8 @@ export class UserController {
   }
 
   @Get()
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users with filtering and pagination (Admin only)' })
   @ApiResponse({
     status: 200,
@@ -148,7 +149,8 @@ export class UserController {
   }
 
   @Delete(':id')
-  @UseGuards(AdminGuard)
+  @UseGuards(JwtAuthGuard, AdminGuard)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete user (Admin only)' })
   @ApiResponse({
     status: 200,

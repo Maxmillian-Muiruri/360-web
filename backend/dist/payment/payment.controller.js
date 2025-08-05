@@ -111,7 +111,7 @@ __decorate([
 ], PaymentController.prototype, "updatePaymentStatus", null);
 exports.PaymentController = PaymentController = __decorate([
     (0, swagger_1.ApiTags)('payments'),
-    (0, common_1.Controller)('api/payments'),
+    (0, common_1.Controller)('payments'),
     __metadata("design:paramtypes", [payment_service_1.PaymentService])
 ], PaymentController);
 //# sourceMappingURL=payment.controller.js.map

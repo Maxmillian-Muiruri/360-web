@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
+import { ProductService, Product } from '../service/product/product.service';
+import { CategoryService, Category } from '../service/category/category.service';
+import { CartService } from '../service/cart/cart.service';
+import { ToastService } from '../services/toast.service';
+import { ProductUtils } from '../shared/utils/product.utils';
 
 @Component({
   selector: 'app-home',
@@ -9,106 +14,163 @@ import { Router } from '@angular/router';
   templateUrl: './home.html',
   styleUrl: './home.css'
 })
-export class HomeComponent {
-  // Featured products data (will be moved to a service later)
-  featuredProducts = [
-    {
-      id: 'Q8GWKIMO',
-      name: 'BITPAY KYC VERIFIED ACCOUNT',
-      category: 'STEALTH ACCOUNTS',
-      price: 250.00,
-      image: 'https://lh3.googleusercontent.com/d/1k4cp-l1nAMSPKBKhn0w48VDt6NypT95P',
-      alt: 'bitpay kyc verified account'
-    },
-    {
-      id: 'PAAR4IHC',
-      name: 'Huntington - Bank Login, Balance within $2000 - $5000',
-      category: 'BANK LOGS',
-      price: 250.00,
-      image: 'https://lh3.googleusercontent.com/d/1iVmJ0SXhStmrwyB5vF4wfwuEiva7Mg6h',
-      alt: 'huntington - bank login, balance within $2000 - $5000'
-    },
-    {
-      id: '0R7UPPNS',
-      name: '$1000 Zelle Transfer – USA',
-      category: 'TRANSFERS',
-      price: 150.00,
-      image: 'https://lh3.googleusercontent.com/d/1QbYkJjXQrnDMkJ4bsVkRaByE3Ztse4Lp',
-      alt: '$1000 zelle transfer – usa'
-    },
-    {
-      id: 'P6PNZZD0',
-      name: 'UK VISA [CREDIT] | 3500+ GBP Balance',
-      category: 'CC & CVV',
-      price: 300.00,
-      image: 'https://lh3.googleusercontent.com/d/1Nv_JnokCyePzWwmSuhN-dp6OG_o145eV',
-      alt: 'uk visa [credit] | 3500+ gbp balance'
-    },
-    {
-      id: '1FGZCNY6',
-      name: '74,000 INR PayTM Transfer',
-      category: 'TRANSFERS',
-      price: 285.00,
-      image: 'https://lh3.googleusercontent.com/d/1Y8cYcSOOMCN2fepNPE3dULYo1CFPnxCn',
-      alt: '74,000 inr paytm transfer'
-    },
-    {
-      id: 'QVGW1CE6',
-      name: 'National Bank of Canada [CANADA] - Bal [$2,000 - $3,000]',
-      category: 'BANK LOGS',
-      price: 200.00,
-      image: 'https://lh3.googleusercontent.com/d/1oM2X3BQc_SWiGCLi_Nj8WFFG8YLV5lKe',
-      alt: 'national bank of canada [canada] - bal [$2,000 - $3,000]'
-    },
-    {
-      id: 'DYALZIK7',
-      name: 'Truist Bank - Bal [$5,000 - $7,000]',
-      category: 'BANK LOGS',
-      price: 300.00,
-      image: 'https://lh3.googleusercontent.com/d/1gJiTRiUteXqu_X2GnyoV06rFq-yD3NYU',
-      alt: 'truist bank - bal [$5,000 - $7,000]'
-    },
-    {
-      id: 'AM8PBE2H',
-      name: 'Shakepay Log | 1500+ CAD Balance',
-      category: 'SHAKEPAY LOG',
-      price: 200.00,
-      image: 'https://lh3.googleusercontent.com/d/1NjTURI6mxiP8nl4F-xGV6V4APMJSuFr5',
-      alt: 'shakepay log | 1500+ cad balance'
-    },
-    {
-      id: 'HUKELDKS',
-      name: 'USA VISA [DEBIT] | $5000+ Balance',
-      category: 'CC & CVV',
-      price: 450.00,
-      image: 'https://lh3.googleusercontent.com/d/17fsF83jmJt6ian0V1YPeZBlpDQuqPZou',
-      alt: 'usa visa [debit] | $5000+ balance'
-    },
-    {
-      id: 'P4RRLWU7',
-      name: 'KYC VERIFICATION SOFTWARE - 2FA BYPASS 2023',
-      category: 'TOOLS',
-      price: 350.00,
-      image: 'https://lh3.googleusercontent.com/d/1F_inx7uKIc0xNekRhPauqNh5G-OKy9Ba',
-      alt: 'kyc verification software - 2fa bypass 2023'
-    }
-  ];
-
+export class HomeComponent implements OnInit {
+  // Products data
+  products: Product[] = [];
+  categories: Category[] = [];
+  
+  // Pagination
+  currentPage = 1;
+  pageSize = 20;
+  total = 0;
+  totalPages = 0;
+  
+  // Loading states
+  loading = false;
+  loadingCategories = false;
+  
+  // Filters
+  selectedCategory = '';
+  searchTerm = '';
+  
   // Notice message
   noticeMessage = "NOTICE: All orders and payments must be made through our website or to our telegram support @charley_707 ONLY. Avoid paying to any third-party user claiming to represent us.";
 
-  constructor(private router: Router) {}
+  // Math for template
+  Math = Math;
 
-  // Add to cart functionality (will be connected to cart service later)
-  addToCart(product: any) {
-    console.log('Adding to cart:', product);
-    // TODO: Implement cart service integration
+  // Expose ProductUtils to template
+  ProductUtils = ProductUtils;
+
+  constructor(
+    private router: Router,
+    private productService: ProductService,
+    private categoryService: CategoryService,
+    private cartService: CartService,
+    private toastService: ToastService
+  ) {}
+
+  ngOnInit() {
+    this.loadCategories();
+    this.loadProducts();
   }
 
-  // View product details - navigate to product page
-  viewProduct(product: any) {
+  loadCategories() {
+    this.loadingCategories = true;
+    this.categoryService.getActiveCategories().subscribe({
+      next: (categories) => {
+        this.categories = categories;
+        this.loadingCategories = false;
+        console.log('Loaded categories for home:', categories);
+      },
+      error: (error) => {
+        console.error('Error loading categories:', error);
+        this.toastService.error('Failed to load categories');
+        this.loadingCategories = false;
+        this.categories = [];
+      }
+    });
+  }
+
+  loadProducts() {
+    this.loading = true;
+    
+    const filters: any = { isActive: true };
+    
+    if (this.selectedCategory) {
+      filters.categoryId = this.selectedCategory;
+    }
+    
+    if (this.searchTerm) {
+      filters.search = this.searchTerm;
+    }
+
+    this.productService.getProducts(this.currentPage, this.pageSize, filters).subscribe({
+      next: (response) => {
+        this.products = response.products;
+        this.total = response.total;
+        this.totalPages = response.totalPages;
+        this.loading = false;
+        console.log('Loaded products for home:', response.products);
+        console.log('Total products:', response.total);
+      },
+      error: (error) => {
+        console.error('Error loading products:', error);
+        this.toastService.error('Failed to load products');
+        this.loading = false;
+      }
+    });
+  }
+
+  // Filter by category
+  filterByCategory(categoryId: string) {
+    this.selectedCategory = categoryId;
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  // Search products
+  searchProducts() {
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  // Clear filters
+  clearFilters() {
+    this.selectedCategory = '';
+    this.searchTerm = '';
+    this.currentPage = 1;
+    this.loadProducts();
+  }
+
+  // Pagination methods
+  previousPage() {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.loadProducts();
+    }
+  }
+
+  nextPage() {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.loadProducts();
+    }
+  }
+
+  goToPage(page: number) {
+    if (page >= 1 && page <= this.totalPages) {
+      this.currentPage = page;
+      this.loadProducts();
+    }
+  }
+
+  // Add to cart functionality
+  addToCart(product: Product) {
+    console.log('Adding to cart:', product);
+    this.cartService.addToCart({ productId: product.id, quantity: 1 }).subscribe({
+      next: (cart) => {
+        this.toastService.success('Product added to cart successfully!');
+        console.log('Cart updated:', cart);
+      },
+      error: (error) => {
+        console.error('Error adding to cart:', error);
+        this.toastService.error('Failed to add product to cart');
+      }
+    });
+  }
+
+  // View product details
+  viewProduct(product: Product) {
     console.log('Viewing product:', product);
-    // Navigate to product details page with product ID
     this.router.navigate(['/product', product.id]);
+  }
+
+  get pageNumbers() {
+    const pages = [];
+    for (let i = 1; i <= this.totalPages; i++) {
+      pages.push(i);
+    }
+    return pages;
   }
 }

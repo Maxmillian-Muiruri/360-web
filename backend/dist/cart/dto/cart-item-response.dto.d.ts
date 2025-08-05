@@ -1,11 +1,9 @@
 export declare class CartItemResponseDto {
     id: string;
     productId: string;
-    productName: string;
-    productPrice: number;
-    productImage?: string;
+    name: string;
+    price: number;
     quantity: number;
-    totalPrice: number;
-    createdAt: Date;
-    updatedAt: Date;
+    image?: string;
+    stockQuantity: number;
 }

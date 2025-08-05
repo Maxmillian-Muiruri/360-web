@@ -12,5 +12,10 @@ exports.default = (0, config_1.registerAs)('app', () => ({
     bcryptRounds: parseInt(process.env.BCRYPT_ROUNDS || '12', 10),
     uploadMaxSize: parseInt(process.env.UPLOAD_MAX_SIZE || '10485760', 10),
     uploadPath: process.env.UPLOAD_PATH || 'uploads',
+    cloudinary: {
+        cloudName: process.env.CLOUDINARY_CLOUD_NAME,
+        apiKey: process.env.CLOUDINARY_API_KEY,
+        apiSecret: process.env.CLOUDINARY_API_SECRET,
+    },
 }));
 //# sourceMappingURL=app.config.js.map
